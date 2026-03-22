@@ -1,0 +1,12 @@
+[package]
+name = "agentd"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+traffic-cat-alerts = { path = "../../crates/alerts" }
+traffic-cat-capture = { path = "../../crates/capture" }
+traffic-cat-domain = { path = "../../crates/domain" }
+traffic-cat-ipc = { path = "../../crates/ipc" }
+traffic-cat-settings = { path = "../../crates/settings" }
+traffic-cat-store = { path = "../../crates/store" }

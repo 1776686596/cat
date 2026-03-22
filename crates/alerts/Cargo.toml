@@ -1,0 +1,4 @@
+[package]
+name = "traffic-cat-alerts"
+edition.workspace = true
+version.workspace = true

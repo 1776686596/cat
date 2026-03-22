@@ -1,0 +1,4 @@
+[package]
+name = "traffic-cat-settings"
+edition.workspace = true
+version.workspace = true

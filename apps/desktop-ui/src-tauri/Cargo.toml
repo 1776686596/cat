@@ -1,0 +1,13 @@
+[package]
+name = "desktop-ui-shell"
+edition.workspace = true
+version.workspace = true
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+traffic-cat-domain = { path = "../../../crates/domain" }
+traffic-cat-ipc = { path = "../../../crates/ipc" }
+traffic-cat-settings = { path = "../../../crates/settings" }

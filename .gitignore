@@ -1,0 +1,6 @@
+/target
+/.dev
+/apps/desktop-ui/node_modules
+/apps/desktop-ui/dist
+*.db
+*.log

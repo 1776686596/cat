@@ -1,0 +1,16 @@
+[workspace]
+members = [
+  "apps/agentd",
+  "apps/desktop-ui/src-tauri",
+  "crates/alerts",
+  "crates/capture",
+  "crates/domain",
+  "crates/ipc",
+  "crates/settings",
+  "crates/store",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+version = "0.1.0"

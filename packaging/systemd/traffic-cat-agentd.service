@@ -1,0 +1,16 @@
+[Unit]
+Description=Traffic Cat Agent Daemon
+After=network.target
+
+[Service]
+Type=simple
+Environment=TRAFFIC_CAT_AGENT_RUNTIME_DIR=/run/traffic-cat
+Environment=TRAFFIC_CAT_AGENT_SOCKET=/run/traffic-cat/agentd.sock
+Environment=TRAFFIC_CAT_AGENT_SOCKET_PATH=/run/traffic-cat/agentd.sock
+Environment=TRAFFIC_CAT_AGENT_DATABASE_PATH=/var/lib/traffic-cat/traffic.db
+ExecStart=/usr/local/bin/traffic-cat-agentd
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Traffic Cat
+Comment=Linux 桌面后台流量观测器
+Exec=/usr/local/bin/traffic-cat-desktop-ui
+Terminal=false
+Categories=Utility;Network;
+X-GNOME-Autostart-enabled=true

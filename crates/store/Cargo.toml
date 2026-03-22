@@ -1,0 +1,7 @@
+[package]
+name = "traffic-cat-store"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+traffic-cat-domain = { path = "../domain" }
