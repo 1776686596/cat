@@ -5,6 +5,7 @@ import type {
   AgentProcessDetailPayload,
   AgentProcessesPayload,
 } from "./desktopBridge";
+import { GAL_MOCK_COPY } from "../copy/galAbstract";
 import type { AgentDashboardPayload } from "../types/appData";
 
 const MOCK_DELAY_MILLIS = 140;
@@ -90,7 +91,7 @@ const MOCK_PROCESSES: MockProcessRecord[] = [
         state: "Established",
       },
     ],
-    recentAlerts: ["后台持续连接时间较长，需要确认是否符合预期。"],
+    recentAlerts: [GAL_MOCK_COPY.bridge.recentAlertSyncthing],
   },
   {
     pid: 3377,
@@ -114,13 +115,13 @@ const MOCK_PROCESSES: MockProcessRecord[] = [
         state: "Observed",
       },
     ],
-    recentAlerts: ["首次连接到 api.github.com，已加入近期观察列表。"],
+    recentAlerts: [GAL_MOCK_COPY.bridge.recentAlertCode],
   },
 ];
 
 export function createMockDesktopBridge(): DesktopAppBridge {
   return {
-    sourceLabel: "开发桥接快照",
+    sourceLabel: GAL_MOCK_COPY.bridge.sourceLabel,
     bridgeKind: "mock",
     loadDashboardPayload: async () => {
       await wait();
@@ -162,13 +163,13 @@ function buildDashboardPayload(): AgentDashboardPayload {
       uds_path: "/run/traffic-cat/agentd.sock",
       permissions: {
         ready: true,
-        details: "开发桥接模式，当前使用模拟快照验证页面承接链路。",
+        details: GAL_MOCK_COPY.bridge.permissionDetails,
       },
       capture: {
         mode: "proc_fallback",
         state: "degraded",
         last_sample_at: now - 1500,
-        details: "当前展示开发桥接快照，后续切到真实 agentd UDS 通道。",
+        details: GAL_MOCK_COPY.bridge.captureDetails,
       },
       store: {
         state: "healthy",
@@ -180,7 +181,7 @@ function buildDashboardPayload(): AgentDashboardPayload {
       capture_mode: "proc_fallback",
       permission_status: "healthy",
       db_status: "healthy",
-      degraded_reason: "当前为开发桥接模式，尚未切到真实桌面命令注入。",
+      degraded_reason: GAL_MOCK_COPY.bridge.degradedReason,
     }),
     liveJson: JSON.stringify({
       generated_at: now,
@@ -188,7 +189,7 @@ function buildDashboardPayload(): AgentDashboardPayload {
       capture_mode: "proc_fallback",
       upload_rate_bytes_per_sec: 640 * 1024,
       download_rate_bytes_per_sec: 5.2 * 1024 * 1024,
-      headline: "syncthing -> 10.0.0.25",
+      headline: GAL_MOCK_COPY.bridge.liveHeadline,
       items: liveItems,
     }),
     alertsJson: JSON.stringify({
@@ -200,8 +201,8 @@ function buildDashboardPayload(): AgentDashboardPayload {
           pid: 2199,
           remote_host: "10.0.0.25",
           created_at: now - 30_000,
-          title: "后台同步仍在持续",
-          body: "后台持续连接时间较长，需要确认是否符合预期。",
+          title: GAL_MOCK_COPY.bridge.alertBannerTitle,
+          body: GAL_MOCK_COPY.bridge.recentAlertSyncthing,
         },
       ],
     }),
@@ -229,7 +230,7 @@ function buildProcessesPayload(): AgentProcessesPayload {
         (process) => ({
           pid: process.pid,
           process_name: process.processName,
-          title: process.recentAlerts[0] ?? "最近发现活动告警",
+          title: process.recentAlerts[0] ?? GAL_MOCK_COPY.bridge.recentAlertTitle,
         }),
       ),
     }),

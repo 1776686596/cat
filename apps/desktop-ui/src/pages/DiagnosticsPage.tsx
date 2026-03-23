@@ -1,5 +1,14 @@
 import MetricChip from "../components/common/MetricChip";
 import SectionCard from "../components/common/SectionCard";
+import {
+  GAL_ACTION_COPY,
+  GAL_METRIC_LABELS,
+  GAL_NOTICE_COPY,
+  GAL_PAGE_COPY,
+  getAgentStatusLabel,
+  getCaptureModeLabel,
+  getDatabaseStatusLabel,
+} from "../copy/galAbstract";
 import type {
   DashboardRuntimeView,
   DiagnosticsSnapshotView,
@@ -17,6 +26,8 @@ export default function DiagnosticsPage({
   onRefresh,
 }: DiagnosticsPageProps) {
   const notice = getDiagnosticsNotice(runtime);
+  const metricLabels = GAL_METRIC_LABELS.diagnostics;
+  const pageCopy = GAL_PAGE_COPY.diagnostics;
 
   return (
     <div className="app-main">
@@ -24,12 +35,11 @@ export default function DiagnosticsPage({
         <header className="page-header">
           <div>
             <p className="page-eyebrow">{snapshot.cycleLabel}</p>
-            <h2>诊断页</h2>
+            <h2>{pageCopy.title}</h2>
+            <p className="page-copy">{pageCopy.lead}</p>
             <p className="page-copy">
-              守护进程离线、权限不足、采集回退都会优先落到这里。
-            </p>
-            <p className="page-copy">
-              数据来源：{runtime.sourceLabel} · {runtime.lastUpdatedLabel}
+              {GAL_PAGE_COPY.common.battleReport}：{runtime.sourceLabel} ·{" "}
+              {runtime.lastUpdatedLabel}
             </p>
           </div>
           <div className="page-header-actions">
@@ -41,12 +51,23 @@ export default function DiagnosticsPage({
               }}
               disabled={runtime.isRefreshing}
             >
-              {runtime.isRefreshing ? "刷新中..." : "重试连接"}
+              {runtime.isRefreshing
+                ? GAL_ACTION_COPY.diagnosticsRefresh.busy
+                : GAL_ACTION_COPY.diagnosticsRefresh.idle}
             </button>
             <div className="metric-row">
-              <MetricChip label="agentd" value={snapshot.agentStatus} />
-              <MetricChip label="采集模式" value={snapshot.captureMode} />
-              <MetricChip label="数据库" value={snapshot.databaseStatus} />
+              <MetricChip
+                label={metricLabels.agent}
+                value={getAgentStatusLabel(snapshot.agentStatus)}
+              />
+              <MetricChip
+                label={metricLabels.captureMode}
+                value={getCaptureModeLabel(snapshot.captureMode)}
+              />
+              <MetricChip
+                label={metricLabels.database}
+                value={getDatabaseStatusLabel(snapshot.databaseStatus)}
+              />
             </div>
           </div>
         </header>
@@ -63,24 +84,24 @@ export default function DiagnosticsPage({
 
       <div className="page-grid">
         <SectionCard
-          eyebrow="连接状态"
-          title="UI 与 agentd"
-          summary="后续会展示 UDS 连接结果、最近成功通信时间和错误原因。"
+          eyebrow={pageCopy.runtime.connectionEyebrow}
+          title={pageCopy.runtime.connectionTitle}
+          summary={pageCopy.runtime.connectionSummary}
           badge={snapshot.socketPath}
           badgeTone="warn"
         >
           <div className="page-note">
-            {snapshot.degradedReason ?? "当前未报告降级原因。"}
+            {snapshot.degradedReason ?? pageCopy.runtime.degradedFallback}
           </div>
         </SectionCard>
 
         <SectionCard
-          eyebrow="权限与能力"
-          title="采集前置条件"
-          summary="这里会明确提示 sudo / capability 缺失，而不是伪造空数据。"
+          eyebrow={pageCopy.runtime.permissionEyebrow}
+          title={pageCopy.runtime.permissionTitle}
+          summary={pageCopy.runtime.permissionSummary}
         >
           <div className="list-item">
-            <strong>不可用时要说清楚</strong>
+            <strong>{pageCopy.runtime.permissionLabel}</strong>
             <span>{snapshot.permissionSummary}</span>
           </div>
         </SectionCard>
@@ -93,7 +114,7 @@ function getDiagnosticsNotice(runtime: DashboardRuntimeView) {
   if (runtime.errorMessage) {
     return {
       tone: "error" as const,
-      title: "诊断桥接异常",
+      title: GAL_NOTICE_COPY.diagnostics.errorTitle,
       message: runtime.errorMessage,
     };
   }
@@ -101,24 +122,24 @@ function getDiagnosticsNotice(runtime: DashboardRuntimeView) {
   if (runtime.isLoading) {
     return {
       tone: "normal" as const,
-      title: "正在探测 agentd",
-      message: "前端正在等待桥接层返回健康检查与状态快照。",
+      title: GAL_NOTICE_COPY.diagnostics.loadingTitle,
+      message: GAL_NOTICE_COPY.common.wait,
     };
   }
 
   if (runtime.mode === "mock") {
     return {
       tone: "normal" as const,
-      title: "当前展示模拟诊断",
-      message: "当前诊断信息来自开发桥接快照，只用于验证页面承接，不代表真实宿主状态。",
+      title: GAL_NOTICE_COPY.common.mockTitle,
+      message: GAL_NOTICE_COPY.common.mockMessage,
     };
   }
 
   if (runtime.isFallback) {
     return {
       tone: "normal" as const,
-      title: "当前展示回退诊断",
-      message: "真实桥接未接管前，页面使用兜底状态提示接入缺口。",
+      title: GAL_NOTICE_COPY.common.fallbackTitle,
+      message: GAL_NOTICE_COPY.common.fallbackMessage,
     };
   }
 

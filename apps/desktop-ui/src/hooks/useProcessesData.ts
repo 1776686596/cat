@@ -1,4 +1,7 @@
 import {
+  GAL_RUNTIME_COPY,
+} from "../copy/galAbstract";
+import {
   getFallbackProcessSummaries,
   resolveProcessesPayload,
 } from "../data/processes";
@@ -9,11 +12,11 @@ export function useProcessesData() {
     fallbackData: getFallbackProcessSummaries,
     loadWithBridge: async (bridge) =>
       resolveProcessesPayload(await bridge.loadProcessesPayload()),
-    bridgeMissingMessage: "桌面桥接尚未注入，当前展示进程页回退快照。",
-    liveSourceLabel: "agentd 进程聚合",
-    fallbackSourceLabel: "前端回退快照",
-    connectingSourceLabel: "正在连接 agentd",
-    initialSyncLabel: "正在加载进程列表",
+    bridgeMissingMessage: GAL_RUNTIME_COPY.bridgeMissingMessage,
+    liveSourceLabel: GAL_RUNTIME_COPY.liveSourceLabel,
+    fallbackSourceLabel: GAL_RUNTIME_COPY.fallbackSourceLabel,
+    connectingSourceLabel: GAL_RUNTIME_COPY.connectingSourceLabel,
+    initialSyncLabel: GAL_RUNTIME_COPY.processesInitialSyncLabel,
   });
 
   return {

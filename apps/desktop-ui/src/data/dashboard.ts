@@ -1,5 +1,10 @@
 import type { AgentDashboardPayload, DashboardData } from "../types/appData";
 import {
+  buildEpisodeLabel,
+  GAL_EPISODE_SCENES,
+  GAL_MOCK_COPY,
+} from "../copy/galAbstract";
+import {
   formatRate,
   formatRelativeTime,
   humanizeDirection,
@@ -83,11 +88,11 @@ export function resolveDashboardPayload(
     generatedAt: live.generated_at ?? health.generated_at ?? null,
     data: {
       realtime: {
-        cycleLabel: "周期五 / 实时桥接承接",
+        cycleLabel: buildEpisodeLabel(5, GAL_EPISODE_SCENES.dashboardRealtimeLive),
         uploadRate: formatRate(live.upload_rate_bytes_per_sec ?? 0),
         downloadRate: formatRate(live.download_rate_bytes_per_sec ?? 0),
         widgetState: live.widget_state ?? "unknown",
-        headline: live.headline ?? "暂无实时摘要",
+        headline: live.headline ?? GAL_MOCK_COPY.dashboard.noHeadline,
         captureMode: live.capture_mode ?? health.capture?.mode ?? "unknown",
         activeConnections: (live.items ?? []).map((item) => ({
           sessionId: item.session_id ?? fallbackSessionId(item),
@@ -105,14 +110,17 @@ export function resolveDashboardPayload(
         })),
       },
       diagnostics: {
-        cycleLabel: "周期五 / 诊断桥接承接",
+        cycleLabel: buildEpisodeLabel(
+          5,
+          GAL_EPISODE_SCENES.dashboardDiagnosticsLive,
+        ),
         agentStatus: status.service_status ?? "unknown",
         captureMode: status.capture_mode ?? health.capture?.mode ?? "unknown",
         databaseStatus: status.db_status ?? health.store?.state ?? "unknown",
         degradedReason: status.degraded_reason ?? health.capture?.details ?? null,
         permissionSummary:
           health.permissions?.details ??
-          "等待接入 src-tauri 对 agentd 的真实健康检查。",
+          GAL_MOCK_COPY.dashboard.fallbackPermissionDetail,
         socketPath: health.uds_path ?? "/run/traffic-cat/agentd.sock",
       },
     },
@@ -122,11 +130,14 @@ export function resolveDashboardPayload(
 export function getFallbackDashboardData(): DashboardData {
   return {
     realtime: {
-      cycleLabel: "周期五 / 前端回退快照",
+      cycleLabel: buildEpisodeLabel(
+        5,
+        GAL_EPISODE_SCENES.dashboardRealtimeFallback,
+      ),
       uploadRate: "0 KB/s",
       downloadRate: "0 KB/s",
       widgetState: "idle",
-      headline: "等待 agentd 实时快照",
+      headline: GAL_MOCK_COPY.dashboard.fallbackHeadline,
       captureMode: "proc_fallback",
       activeConnections: [
         {
@@ -168,12 +179,15 @@ export function getFallbackDashboardData(): DashboardData {
       ],
     },
     diagnostics: {
-      cycleLabel: "周期五 / 诊断回退快照",
+      cycleLabel: buildEpisodeLabel(
+        5,
+        GAL_EPISODE_SCENES.dashboardDiagnosticsFallback,
+      ),
       agentStatus: "degraded",
       captureMode: "proc_fallback",
       databaseStatus: "healthy",
-      degradedReason: "当前使用 /proc 回退采集，精度低于 eBPF 模式。",
-      permissionSummary: "权限与运行目录检查通过，当前处于回退采集模式。",
+      degradedReason: GAL_MOCK_COPY.dashboard.fallbackDegradedReason,
+      permissionSummary: GAL_MOCK_COPY.dashboard.fallbackPermissionSummary,
       socketPath: "/run/traffic-cat/agentd.sock",
     },
   };

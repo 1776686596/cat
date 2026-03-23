@@ -1,4 +1,11 @@
 import type { AgentProcessDetailPayload } from "../bridge/desktopBridge";
+import {
+  buildEpisodeLabel,
+  GAL_EPISODE_SCENES,
+  GAL_MOCK_COPY,
+  GAL_NOTICE_COPY,
+  getConnectionStateLabel,
+} from "../copy/galAbstract";
 import type { ProcessDetailView } from "../types/appData";
 import {
   formatBytes,
@@ -51,7 +58,7 @@ export function resolveProcessDetailPayload(
   return {
     generatedAt: Date.now(),
     data: {
-      cycleLabel: "周期六 / 详情桥接承接",
+      cycleLabel: buildEpisodeLabel(6, GAL_EPISODE_SCENES.processDetailLive),
       pid: detail.pid ?? pid,
       processName: detail.process_name ?? `pid ${pid}`,
       lastActiveLabel: formatRelativeTime(detail.last_active_at),
@@ -63,7 +70,7 @@ export function resolveProcessDetailPayload(
         localPortLabel: formatLocalPort(item.local_port),
         direction: humanizeDirection(item.direction),
         protocol: humanizeProtocol(item.protocol),
-        state: item.state?.toLowerCase() ?? "unknown",
+        state: getConnectionStateLabel(item.state?.toLowerCase() ?? "unknown"),
         uploadRate: formatRate(item.current_tx_rate ?? 0),
         downloadRate: formatRate(item.current_rx_rate ?? 0),
         totalRate: formatRate(
@@ -77,9 +84,9 @@ export function resolveProcessDetailPayload(
 
 export function getEmptyProcessDetail(): ProcessDetailView {
   return {
-    cycleLabel: "周期六 / 等待选择",
+    cycleLabel: buildEpisodeLabel(6, GAL_EPISODE_SCENES.processDetailDisabled),
     pid: null,
-    processName: "未选择进程",
+    processName: GAL_NOTICE_COPY.processDetail.unselectedTitle,
     lastActiveLabel: "-",
     totalTraffic: "0 B",
     recentAlerts: [],
@@ -93,15 +100,15 @@ export function getFallbackProcessDetail(pid: number | null): ProcessDetailView 
   }
 
   return {
-    cycleLabel: "周期六 / 详情回退快照",
+    cycleLabel: buildEpisodeLabel(6, GAL_EPISODE_SCENES.processDetailFallback),
     pid,
     processName: pid === 2199 ? "syncthing" : "curl",
     lastActiveLabel: "刚刚",
     totalTraffic: pid === 2199 ? "412 MB" : "96 KB",
     recentAlerts:
       pid === 2199
-        ? ["后台持续连接时间较长，需要确认是否符合预期。"]
-        : ["首次连接到 1.1.1.1，已加入近期观察列表。"],
+        ? [GAL_MOCK_COPY.processDetail.fallbackAlertSyncthing]
+        : [GAL_MOCK_COPY.processDetail.fallbackAlertCurl],
     activeConnections: [
       {
         sessionId: `${pid}-demo-primary`,
@@ -109,7 +116,7 @@ export function getFallbackProcessDetail(pid: number | null): ProcessDetailView 
         localPortLabel: pid === 2199 ? "本地端口 22000" : "本地端口 49152",
         direction: pid === 2199 ? "双向" : "上行",
         protocol: "TCP",
-        state: "established",
+        state: getConnectionStateLabel("established"),
         uploadRate: pid === 2199 ? "410 KB/s" : "92 KB/s",
         downloadRate: pid === 2199 ? "450 KB/s" : "4 KB/s",
         totalRate: pid === 2199 ? "860 KB/s" : "96 KB/s",

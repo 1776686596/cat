@@ -1,4 +1,5 @@
 import type { AgentHistoryQuery } from "../bridge/desktopBridge";
+import { GAL_RUNTIME_COPY } from "../copy/galAbstract";
 import { getFallbackHistoryPage, resolveHistoryPayload } from "../data/history";
 import { useBridgeResource } from "./useBridgeResource";
 
@@ -22,11 +23,11 @@ export function useHistoryData(query?: AgentHistoryQuery) {
     fallbackData: getFallbackHistoryPage,
     loadWithBridge: async (bridge) =>
       resolveHistoryPayload(await bridge.loadHistoryPayload(effectiveQuery)),
-    bridgeMissingMessage: "桌面桥接尚未注入，当前展示历史页回退快照。",
-    liveSourceLabel: "agentd 历史分页",
-    fallbackSourceLabel: "前端回退快照",
-    connectingSourceLabel: "正在连接 agentd",
-    initialSyncLabel: "正在加载历史分页",
+    bridgeMissingMessage: GAL_RUNTIME_COPY.bridgeMissingMessage,
+    liveSourceLabel: GAL_RUNTIME_COPY.liveSourceLabel,
+    fallbackSourceLabel: GAL_RUNTIME_COPY.fallbackSourceLabel,
+    connectingSourceLabel: GAL_RUNTIME_COPY.connectingSourceLabel,
+    initialSyncLabel: GAL_RUNTIME_COPY.historyInitialSyncLabel,
   });
 
   return {

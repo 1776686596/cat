@@ -1,6 +1,10 @@
 import { useState } from "react";
 
 import { NAV_ITEMS, type AppView } from "./navigation";
+import {
+  GAL_SHELL_COPY,
+  getRuntimeModeLabel,
+} from "../copy/galAbstract";
 import { useDashboardData } from "../hooks/useDashboardData";
 import DiagnosticsPage from "../pages/DiagnosticsPage";
 import HistoryPage from "../pages/HistoryPage";
@@ -8,13 +12,13 @@ import ProcessDetailPage from "../pages/ProcessDetailPage";
 import ProcessesPage from "../pages/ProcessesPage";
 import RealtimePage from "../pages/RealtimePage";
 
-const PAGE_TITLES: Record<AppView, string> = {
-  realtime: "实时流向与挂件入口",
-  processes: "进程聚合概览",
-  "process-detail": "单进程时间线",
-  history: "历史过滤与导出",
-  diagnostics: "权限与连接诊断",
-};
+const PAGE_TITLES = NAV_ITEMS.reduce<Record<AppView, string>>(
+  (titles, item) => {
+    titles[item.key] = item.label;
+    return titles;
+  },
+  {} as Record<AppView, string>,
+);
 
 interface DashboardAppProps {
   initialView?: Extract<AppView, "realtime" | "processes" | "history" | "diagnostics">;
@@ -27,6 +31,7 @@ export default function App({
   const [selectedProcessId, setSelectedProcessId] = useState<number | null>(null);
   const { dashboardData, runtime, refresh } = useDashboardData();
   const processDetailLocked = selectedProcessId === null;
+  const runtimeTone = getRuntimeTone(runtime.mode);
   const inspectProcess = (pid: number) => {
     setSelectedProcessId(pid);
     setActiveView("process-detail");
@@ -83,16 +88,41 @@ export default function App({
     <div className="app-shell">
       <aside className="app-sidebar">
         <div className="brand-block">
-          <span className="brand-chip">traffic-cat</span>
-          <h1>Linux 桌面后台流量观测器</h1>
-          <p>
-            第一个开发周期先把共享类型和 UI 主骨架打稳，后续接入
-            agentd 时不再返工页面结构。
-          </p>
+          <div className="brand-row">
+            <span className="brand-chip">traffic-cat</span>
+            <span className={`runtime-pill is-${runtimeTone}`.trim()}>
+              {getRuntimeModeLabel(runtime.mode)}
+            </span>
+          </div>
+          <h1>{GAL_SHELL_COPY.title}</h1>
+          <p>{GAL_SHELL_COPY.subtitle}</p>
+        </div>
+
+        <div className="sidebar-overview">
+          <div className="sidebar-overview-card">
+            <span>{GAL_SHELL_COPY.cards.focus}</span>
+            <strong>{PAGE_TITLES[activeView]}</strong>
+          </div>
+          <div className="sidebar-overview-card">
+            <span>{GAL_SHELL_COPY.cards.source}</span>
+            <strong>{runtime.sourceLabel}</strong>
+          </div>
+          <div className="sidebar-overview-card">
+            <span>{GAL_SHELL_COPY.cards.sync}</span>
+            <strong>{runtime.lastUpdatedLabel}</strong>
+          </div>
+          <div className="sidebar-overview-card">
+            <span>{GAL_SHELL_COPY.cards.selectedPid}</span>
+            <strong>
+              {selectedProcessId === null
+                ? GAL_SHELL_COPY.selectedPidEmpty
+                : `PID ${selectedProcessId}`}
+            </strong>
+          </div>
         </div>
 
         <nav className="nav-list" aria-label="主导航">
-          {NAV_ITEMS.map((item) => (
+          {NAV_ITEMS.map((item, index) => (
             <button
               key={item.key}
               className={[
@@ -107,20 +137,21 @@ export default function App({
               disabled={item.key === "process-detail" && processDetailLocked}
               title={
                 item.key === "process-detail" && processDetailLocked
-                  ? "先到进程聚合页选择一个 PID"
+                  ? GAL_SHELL_COPY.lockedProcessTitle
                   : undefined
               }
             >
-              <span className="nav-label">{item.label}</span>
-              <span className="nav-copy">{item.copy}</span>
+              <span className="nav-index">{String(index + 1).padStart(2, "0")}</span>
+              <span className="nav-body">
+                <span className="nav-label">{item.label}</span>
+                <span className="nav-copy">{item.copy}</span>
+              </span>
             </button>
           ))}
         </nav>
 
         <div className="sidebar-footer">
-          <p className="page-eyebrow">数据链路</p>
-          <p className="section-summary">{runtime.sourceLabel}</p>
-          <p className="sidebar-meta">{runtime.lastUpdatedLabel}</p>
+          <p className="sidebar-meta">{PAGE_TITLES[activeView]}</p>
           <button
             className="action-button"
             type="button"
@@ -129,21 +160,20 @@ export default function App({
             }}
             disabled={runtime.isRefreshing}
           >
-            {runtime.isRefreshing ? "刷新中..." : "立即刷新"}
+            {runtime.isRefreshing
+              ? GAL_SHELL_COPY.actions.refreshBusy
+              : GAL_SHELL_COPY.actions.refreshIdle}
           </button>
           {runtime.errorMessage ? (
             <p className="sidebar-warning">{runtime.errorMessage}</p>
           ) : null}
           {selectedProcessId !== null ? (
-            <p className="sidebar-meta">当前选中 PID {selectedProcessId}</p>
-          ) : (
-            <p className="sidebar-warning">
-              进程详情页需要先在“进程聚合”里选择一个 PID。
+            <p className="sidebar-meta">
+              {GAL_SHELL_COPY.cards.selectedPid} PID {selectedProcessId}
             </p>
+          ) : (
+            <p className="sidebar-warning">{GAL_SHELL_COPY.noSelectedProcessHint}</p>
           )}
-
-          <p className="page-eyebrow">当前焦点</p>
-          <p className="section-summary">{PAGE_TITLES[activeView]}</p>
         </div>
       </aside>
 
@@ -159,23 +189,17 @@ function renderRuntimeBanner(runtime: ReturnType<typeof useDashboardData>["runti
   if (runtime.mode === "mock") {
     return (
       <section className="global-banner is-warn">
-        <strong>当前展示的是模拟数据</strong>
-        <span>
-          你现在运行的是纯前端开发模式，顶部速率、进程和告警来自开发桥接快照，
-          不代表本机实时网络流量。
-        </span>
+        <strong>{GAL_SHELL_COPY.banners.mock.title}</strong>
+        <span>{GAL_SHELL_COPY.banners.mock.message}</span>
       </section>
     );
   }
 
-  if (runtime.sourceLabel === "开发代理桥接") {
+  if (runtime.mode === "live") {
     return (
       <section className="global-banner is-live">
-        <strong>当前通过开发代理读取真实数据</strong>
-        <span>
-          你现在虽然跑的是 `npm run dev`，但页面数据已经通过本地 dev bridge
-          转发到 desktop-ui-shell，再由它读取 agentd。
-        </span>
+        <strong>{GAL_SHELL_COPY.banners.live.title}</strong>
+        <span>{GAL_SHELL_COPY.banners.live.message}</span>
       </section>
     );
   }
@@ -183,14 +207,26 @@ function renderRuntimeBanner(runtime: ReturnType<typeof useDashboardData>["runti
   if (runtime.mode === "fallback") {
     return (
       <section className="global-banner is-error">
-        <strong>当前已切回前端回退数据</strong>
-        <span>
-          桌面桥接尚未接通，或者最近一次请求失败。页面结构还能看，但数据不代表
-          当前 agentd 的真实状态。
-        </span>
+        <strong>{GAL_SHELL_COPY.banners.fallback.title}</strong>
+        <span>{GAL_SHELL_COPY.banners.fallback.message}</span>
       </section>
     );
   }
 
   return null;
+}
+
+function getRuntimeTone(mode: ReturnType<typeof useDashboardData>["runtime"]["mode"]) {
+  switch (mode) {
+    case "live":
+      return "live";
+    case "mock":
+      return "mock";
+    case "fallback":
+      return "fallback";
+    case "connecting":
+      return "connecting";
+    case "disabled":
+      return "disabled";
+  }
 }

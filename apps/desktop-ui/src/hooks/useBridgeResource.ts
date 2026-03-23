@@ -4,6 +4,7 @@ import {
   resolveDesktopBridge,
   type DesktopAppBridge,
 } from "../bridge/desktopBridge";
+import { GAL_RUNTIME_COPY } from "../copy/galAbstract";
 import type { DashboardRuntimeView } from "../types/appData";
 
 const DEFAULT_POLL_INTERVAL_MILLIS = 5_000;
@@ -69,7 +70,7 @@ export function useBridgeResource<T>(options: BridgeResourceOptions<T>) {
             mode: "fallback",
             errorMessage: options.bridgeMissingMessage,
             sourceLabel: options.fallbackSourceLabel,
-            lastUpdatedLabel: "未连接",
+            lastUpdatedLabel: GAL_RUNTIME_COPY.disconnectedSyncLabel,
           },
         });
       });
@@ -130,9 +131,9 @@ export function useBridgeResource<T>(options: BridgeResourceOptions<T>) {
             isRefreshing: false,
             isFallback: true,
             mode: "fallback",
-            errorMessage: `拉取 agentd 快照失败：${normalizeError(error)}`,
+            errorMessage: `抓快照翻车：${normalizeError(error)}`,
             sourceLabel: options.fallbackSourceLabel,
-            lastUpdatedLabel: "已切回回退数据",
+            lastUpdatedLabel: GAL_RUNTIME_COPY.fallbackSyncLabel,
           },
         });
       });
@@ -209,7 +210,8 @@ function buildDisabledState<T>(
       mode: "disabled",
       errorMessage: null,
       sourceLabel: options.disabledSourceLabel ?? options.fallbackSourceLabel,
-      lastUpdatedLabel: options.disabledSyncLabel ?? "未启用",
+      lastUpdatedLabel:
+        options.disabledSyncLabel ?? GAL_RUNTIME_COPY.disabledSyncLabel,
     },
   };
 }
@@ -218,7 +220,7 @@ function normalizeError(error: unknown): string {
   if (error instanceof Error && error.message.trim().length > 0) {
     return error.message;
   }
-  return "未知错误";
+  return GAL_RUNTIME_COPY.unknownError;
 }
 
 function formatSyncLabel(timestamp: number): string {
@@ -226,5 +228,5 @@ function formatSyncLabel(timestamp: number): string {
   const hours = String(date.getHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
   const seconds = String(date.getSeconds()).padStart(2, "0");
-  return `最近同步 ${hours}:${minutes}:${seconds}`;
+  return `刚抓到 ${hours}:${minutes}:${seconds}`;
 }

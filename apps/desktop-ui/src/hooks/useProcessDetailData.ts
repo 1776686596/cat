@@ -1,4 +1,7 @@
 import {
+  GAL_RUNTIME_COPY,
+} from "../copy/galAbstract";
+import {
   getEmptyProcessDetail,
   getFallbackProcessDetail,
   resolveProcessDetailPayload,
@@ -16,13 +19,13 @@ export function useProcessDetailData(selectedProcessId: number | null) {
         selectedProcessId ?? 0,
         await bridge.loadProcessDetailPayload(selectedProcessId ?? 0),
       ),
-    bridgeMissingMessage: "桌面桥接尚未注入，当前展示进程详情回退快照。",
-    liveSourceLabel: "agentd 进程详情",
-    fallbackSourceLabel: "前端回退快照",
-    connectingSourceLabel: "正在连接 agentd",
-    initialSyncLabel: "正在加载详情",
-    disabledSourceLabel: "等待选择进程",
-    disabledSyncLabel: "未选择",
+    bridgeMissingMessage: GAL_RUNTIME_COPY.bridgeMissingMessage,
+    liveSourceLabel: GAL_RUNTIME_COPY.liveSourceLabel,
+    fallbackSourceLabel: GAL_RUNTIME_COPY.fallbackSourceLabel,
+    connectingSourceLabel: GAL_RUNTIME_COPY.connectingSourceLabel,
+    initialSyncLabel: GAL_RUNTIME_COPY.processDetailInitialSyncLabel,
+    disabledSourceLabel: GAL_RUNTIME_COPY.processDetailDisabledSourceLabel,
+    disabledSyncLabel: GAL_RUNTIME_COPY.processDetailDisabledSyncLabel,
   });
 
   return {

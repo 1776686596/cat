@@ -1,4 +1,8 @@
 import type { AgentHistoryPayload } from "../bridge/desktopBridge";
+import {
+  buildEpisodeLabel,
+  GAL_EPISODE_SCENES,
+} from "../copy/galAbstract";
 import type { HistoryPageView } from "../types/appData";
 import {
   formatBytes,
@@ -47,7 +51,7 @@ export function resolveHistoryPayload(
   return {
     generatedAt: Date.now(),
     data: {
-      cycleLabel: "周期六 / 历史桥接承接",
+      cycleLabel: buildEpisodeLabel(6, GAL_EPISODE_SCENES.historyLive),
       total: history.total ?? 0,
       limit: history.limit ?? 0,
       offset: history.offset ?? 0,
@@ -67,7 +71,7 @@ export function resolveHistoryPayload(
 
 export function getFallbackHistoryPage(): HistoryPageView {
   return {
-    cycleLabel: "周期六 / 历史回退快照",
+    cycleLabel: buildEpisodeLabel(6, GAL_EPISODE_SCENES.historyFallback),
     total: 3,
     limit: 20,
     offset: 0,
@@ -121,9 +125,9 @@ function formatHistoryTime(
   endedAt?: number | null,
 ): string {
   if (endedAt) {
-    return `${formatRelativeTime(endedAt)}结束`;
+    return `${formatRelativeTime(endedAt)}收工`;
   }
-  return `${formatRelativeTime(startedAt)}活跃`;
+  return `${formatRelativeTime(startedAt)}还在整活`;
 }
 
 function buildFallbackSessionId(item: AgentHistoryItemPayload): string {

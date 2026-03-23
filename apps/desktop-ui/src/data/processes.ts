@@ -1,4 +1,9 @@
 import type { AgentProcessesPayload } from "../bridge/desktopBridge";
+import {
+  buildEpisodeLabel,
+  GAL_EPISODE_SCENES,
+  getAlertBadgeLabel,
+} from "../copy/galAbstract";
 import type { ProcessSummariesView } from "../types/appData";
 import { formatBytes, formatRelativeTime } from "./formatters";
 
@@ -36,7 +41,7 @@ export function resolveProcessesPayload(
   return {
     generatedAt: Date.now(),
     data: {
-      cycleLabel: "周期六 / 进程桥接承接",
+      cycleLabel: buildEpisodeLabel(6, GAL_EPISODE_SCENES.processesLive),
       items: (summaries.items ?? []).map((item) => ({
         pid: item.pid ?? 0,
         processName: item.process_name ?? "unknown",
@@ -44,7 +49,7 @@ export function resolveProcessesPayload(
         totalTraffic: formatBytes((item.tx_bytes ?? 0) + (item.rx_bytes ?? 0)),
         destinationCount: item.destination_count ?? 0,
         lastActiveLabel: formatRelativeTime(item.last_active_at),
-        alertLabel: item.has_active_alert ? "是" : "否",
+        alertLabel: getAlertBadgeLabel(item.has_active_alert ?? false),
         hasActiveAlert: item.has_active_alert ?? false,
       })),
     },
@@ -53,7 +58,7 @@ export function resolveProcessesPayload(
 
 export function getFallbackProcessSummaries(): ProcessSummariesView {
   return {
-    cycleLabel: "周期六 / 进程回退快照",
+    cycleLabel: buildEpisodeLabel(6, GAL_EPISODE_SCENES.processesFallback),
     items: [
       {
         pid: 1212,
@@ -62,7 +67,7 @@ export function getFallbackProcessSummaries(): ProcessSummariesView {
         totalTraffic: "1.3 GB",
         destinationCount: 6,
         lastActiveLabel: "2 分钟前",
-        alertLabel: "否",
+        alertLabel: getAlertBadgeLabel(false),
         hasActiveAlert: false,
       },
       {
@@ -72,7 +77,7 @@ export function getFallbackProcessSummaries(): ProcessSummariesView {
         totalTraffic: "412 MB",
         destinationCount: 2,
         lastActiveLabel: "刚刚",
-        alertLabel: "是",
+        alertLabel: getAlertBadgeLabel(true),
         hasActiveAlert: true,
       },
       {
@@ -82,7 +87,7 @@ export function getFallbackProcessSummaries(): ProcessSummariesView {
         totalTraffic: "128 MB",
         destinationCount: 4,
         lastActiveLabel: "10 秒前",
-        alertLabel: "否",
+        alertLabel: getAlertBadgeLabel(false),
         hasActiveAlert: false,
       },
     ],

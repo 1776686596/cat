@@ -2,6 +2,15 @@ import { buildAppUrl } from "../app/windowMode";
 import MetricChip from "../components/common/MetricChip";
 import SectionCard from "../components/common/SectionCard";
 import TrafficWidgetCard from "../components/widget/TrafficWidgetCard";
+import {
+  GAL_ACTION_COPY,
+  GAL_METRIC_LABELS,
+  GAL_NOTICE_COPY,
+  GAL_PAGE_COPY,
+  getCaptureModeLabel,
+  getRealtimeRuntimeLabel,
+  getWidgetStateLabel,
+} from "../copy/galAbstract";
 import type {
   DashboardRuntimeView,
   RealtimeSnapshotView,
@@ -19,6 +28,40 @@ export default function RealtimePage({
   onRefresh,
 }: RealtimePageProps) {
   const notice = getRealtimeNotice(snapshot, runtime);
+  const realtimeMetricLabels = GAL_METRIC_LABELS.realtime;
+  const realtimePageCopy = GAL_PAGE_COPY.realtime;
+  const spotlightCards = [
+    {
+      label: realtimeMetricLabels.activeConnections,
+      value: `${snapshot.activeConnections.length} 条`,
+      detail:
+        snapshot.activeConnections[0] === undefined
+          ? realtimePageCopy.spotlight.noHotspot
+          : `${snapshot.activeConnections[0].processName} ${realtimePageCopy.spotlight.liveDetailSuffix}`,
+    },
+    {
+      label: realtimeMetricLabels.captureMode,
+      value: getCaptureModeLabel(snapshot.captureMode),
+      detail:
+        snapshot.captureMode === "proc_fallback"
+          ? realtimePageCopy.spotlight.fallbackCaptureDetail
+          : realtimePageCopy.spotlight.liveCaptureDetail,
+    },
+    {
+      label: realtimeMetricLabels.widgetState,
+      value: getWidgetStateLabel(snapshot.widgetState),
+      detail: `上行 ${snapshot.uploadRate} · 下行 ${snapshot.downloadRate}`,
+    },
+    {
+      label: realtimeMetricLabels.syncState,
+      value: getRealtimeRuntimeLabel(runtime.mode, {
+        isLoading: runtime.isLoading,
+        isRefreshing: runtime.isRefreshing,
+        hasError: Boolean(runtime.errorMessage),
+      }),
+      detail: runtime.lastUpdatedLabel,
+    },
+  ];
   const openWidgetPreview = () => {
     if (typeof window === "undefined") {
       return;
@@ -36,46 +79,64 @@ export default function RealtimePage({
 
   return (
     <div className="app-main">
-      <section className="app-panel">
-        <header className="page-header">
-          <div>
+      <section className="app-panel app-panel--hero">
+        <div className="realtime-hero">
+          <div className="realtime-hero__copy">
             <p className="page-eyebrow">{snapshot.cycleLabel}</p>
-            <h2>实时流向</h2>
-            <p className="page-copy">
-              当前页面会优先读取桌面桥接数据；如果你只是单独启动前端开发服务，
-              这里展示的就是模拟快照。
-            </p>
-            <p className="page-copy">
-              如果当前采集模式是 <code>proc_fallback</code>，顶部速率会优先按
-              TCP_INFO 累计字节差分估算 TCP 连接；QUIC/UDP 暂时没有同等级别的
-              内核累计字节，因此仍不等同于 eBPF 精度。
-            </p>
-            <p className="page-copy">
-              数据来源：{runtime.sourceLabel} · {runtime.lastUpdatedLabel}
-            </p>
-          </div>
-          <div className="page-header-actions">
-            <button
-              className="action-button"
-              type="button"
-              onClick={() => {
-                void onRefresh();
-              }}
-              disabled={runtime.isRefreshing}
-            >
-              {runtime.isLoading
-                ? "首屏加载中..."
-                : runtime.isRefreshing
-                  ? "刷新中..."
-                  : "刷新快照"}
-            </button>
-            <div className="metric-row">
-              <MetricChip label="上行" value={snapshot.uploadRate} />
-              <MetricChip label="下行" value={snapshot.downloadRate} />
-              <MetricChip label="主状态" value={snapshot.widgetState} />
+            <h2>{realtimePageCopy.title}</h2>
+            <p className="page-lead">{realtimePageCopy.lead}</p>
+            <div className="page-copy-cluster">
+              <p className="page-copy">
+                {GAL_PAGE_COPY.common.battleReport}：{runtime.sourceLabel} ·{" "}
+                {runtime.lastUpdatedLabel}
+              </p>
             </div>
           </div>
-        </header>
+
+          <div className="realtime-hero__aside">
+            <div className="realtime-kpi-grid">
+              {spotlightCards.map((item) => (
+                <article className="realtime-kpi-card" key={item.label}>
+                  <span>{item.label}</span>
+                  <strong>{item.value}</strong>
+                  <p>{item.detail}</p>
+                </article>
+              ))}
+            </div>
+
+            <div className="page-header-actions page-header-actions--hero">
+              <button
+                className="action-button"
+                type="button"
+                onClick={() => {
+                  void onRefresh();
+                }}
+                disabled={runtime.isRefreshing}
+              >
+                {runtime.isLoading
+                  ? GAL_ACTION_COPY.realtimeRefresh.loading
+                  : runtime.isRefreshing
+                    ? GAL_ACTION_COPY.realtimeRefresh.busy
+                    : GAL_ACTION_COPY.realtimeRefresh.idle}
+              </button>
+
+              <div className="metric-row">
+                <MetricChip
+                  label={realtimeMetricLabels.upload}
+                  value={snapshot.uploadRate}
+                />
+                <MetricChip
+                  label={realtimeMetricLabels.download}
+                  value={snapshot.downloadRate}
+                />
+                <MetricChip
+                  label={realtimeMetricLabels.state}
+                  value={getWidgetStateLabel(snapshot.widgetState)}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
         {notice ? (
           <div
@@ -90,26 +151,24 @@ export default function RealtimePage({
       <div className="realtime-layout">
         <section className="widget-preview-section">
           <div className="widget-preview-copy">
-            <p className="page-eyebrow">挂件预览</p>
-            <h3>右下角的小猫，现在更像一个轻盈的桌面挂件</h3>
-            <p className="section-summary">
-              默认只保留状态、上/下行和一条摘要；悬停时再展开最近 3
-              条活跃流量，避免把角落挂件做成一张缩水监控卡片。
-            </p>
+            <p className="page-eyebrow">{realtimePageCopy.widgetPreviewEyebrow}</p>
+            <h3>{realtimePageCopy.widgetPreviewTitle}</h3>
+            <p className="section-summary">{realtimePageCopy.widgetPreviewSummary}</p>
 
             <div className="widget-preview-points">
               <div className="widget-preview-point">
-                <strong>默认态</strong>
-                <span>固定单行摘要，目标地址空间不足时直接裁剪，不换行。</span>
+                <strong>{realtimePageCopy.widgetPoints.idleTitle}</strong>
+                <span>{realtimePageCopy.widgetPoints.idleCopy}</span>
               </div>
               <div className="widget-preview-point">
-                <strong>悬停态</strong>
-                <span>展开最重要的 3 条实时流量，只保留进程、目标和速率。</span>
+                <strong>{realtimePageCopy.widgetPoints.hoverTitle}</strong>
+                <span>{realtimePageCopy.widgetPoints.hoverCopy}</span>
               </div>
               <div className="widget-preview-point">
-                <strong>当前快照</strong>
+                <strong>{realtimePageCopy.widgetPoints.currentTitle}</strong>
                 <span>
-                  主状态 {snapshot.widgetState} · 采集模式 {snapshot.captureMode}
+                  {realtimeMetricLabels.state} {getWidgetStateLabel(snapshot.widgetState)} ·{" "}
+                  {realtimeMetricLabels.captureMode} {getCaptureModeLabel(snapshot.captureMode)}
                 </span>
               </div>
             </div>
@@ -119,7 +178,7 @@ export default function RealtimePage({
             snapshot={snapshot}
             runtime={runtime}
             mode="panel"
-            primaryActionLabel="新窗口预览挂件"
+            primaryActionLabel={GAL_ACTION_COPY.realtimeOpenWidget}
             onPrimaryAction={openWidgetPreview}
             onRefresh={onRefresh}
             refreshDisabled={runtime.isRefreshing}
@@ -127,15 +186,13 @@ export default function RealtimePage({
         </section>
 
         <SectionCard
-          eyebrow="活跃连接"
-          title="当前热点流量"
-          summary="顶部上下行汇总全部活跃连接；下面逐条拆开展示上行、下行和合计速率，便于对账。"
-          badge={`${snapshot.activeConnections.length} 条活跃连接`}
+          eyebrow={realtimePageCopy.hotspot.eyebrow}
+          title={realtimePageCopy.hotspot.title}
+          summary={realtimePageCopy.hotspot.summary}
+          badge={`${snapshot.activeConnections.length} ${realtimePageCopy.hotspot.badgeSuffix}`}
         >
           {snapshot.activeConnections.length === 0 ? (
-            <div className="page-note">
-              当前没有可展示的活跃连接，等待下一次成功同步。
-            </div>
+            <div className="page-note">{realtimePageCopy.hotspot.empty}</div>
           ) : (
             <div className="list-block">
               {snapshot.activeConnections.map((item) => (
@@ -149,7 +206,7 @@ export default function RealtimePage({
                     {item.localPortLabel} · {item.lastSeenLabel}
                     {snapshot.captureMode === "proc_fallback" &&
                     item.protocol === "UDP"
-                      ? " · 速率覆盖受限"
+                      ? " · 数值有点演"
                       : ""}
                   </span>
                 </div>
@@ -169,7 +226,7 @@ function getRealtimeNotice(
   if (runtime.errorMessage) {
     return {
       tone: "error" as const,
-      title: "实时桥接异常",
+      title: GAL_NOTICE_COPY.realtime.errorTitle,
       message: runtime.errorMessage,
     };
   }
@@ -177,33 +234,32 @@ function getRealtimeNotice(
   if (runtime.isLoading) {
     return {
       tone: "normal" as const,
-      title: "正在同步首屏快照",
-      message: "前端正在等待 agentd 首次返回实时数据。",
+      title: GAL_NOTICE_COPY.realtime.loadingTitle,
+      message: GAL_NOTICE_COPY.common.wait,
     };
   }
 
   if (runtime.mode === "mock") {
     return {
       tone: "normal" as const,
-      title: "当前展示模拟快照",
-      message: "你现在运行的是前端开发模式，实时列表和顶部速率都来自 mock bridge。",
+      title: GAL_NOTICE_COPY.common.mockTitle,
+      message: GAL_NOTICE_COPY.common.mockMessage,
     };
   }
 
   if (runtime.isFallback) {
     return {
       tone: "normal" as const,
-      title: "当前展示回退快照",
-      message: "真实桥接尚未接管，页面使用本地兜底数据保持结构稳定。",
+      title: GAL_NOTICE_COPY.common.fallbackTitle,
+      message: GAL_NOTICE_COPY.common.fallbackMessage,
     };
   }
 
   if (snapshot.captureMode === "proc_fallback" && isZeroThroughputSnapshot(snapshot)) {
     return {
       tone: "normal" as const,
-      title: "当前只拿到了连接，没拿到字节计数",
-      message:
-        "你现在看到的是 /proc 回退采集结果。普通用户运行时，很多进程的 TCP_INFO 无法读取，所以连接列表能出来，但顶部速率、连接速率和进程累计流量可能长期是 0。要验证真实速率，请用 sudo 或带 capability 的方式运行 agentd。",
+      title: GAL_NOTICE_COPY.realtime.zeroRateTitle,
+      message: GAL_NOTICE_COPY.realtime.zeroRateMessage,
     };
   }
 
@@ -213,9 +269,8 @@ function getRealtimeNotice(
   ) {
     return {
       tone: "normal" as const,
-      title: "检测到 UDP 活跃连接",
-      message:
-        "当前仍处于 /proc 回退采集，UDP/QUIC 缺少 TCP_INFO 这类累计字节；顶部总速率可能偏低，直播和 HTTP/3 场景最明显。",
+      title: GAL_NOTICE_COPY.realtime.fallbackCaptureTitle,
+      message: GAL_NOTICE_COPY.realtime.fallbackCaptureMessage,
     };
   }
 

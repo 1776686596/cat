@@ -1,5 +1,13 @@
 import MetricChip from "../components/common/MetricChip";
 import SectionCard from "../components/common/SectionCard";
+import {
+  GAL_ACTION_COPY,
+  GAL_METRIC_LABELS,
+  GAL_NOTICE_COPY,
+  GAL_PAGE_COPY,
+  GAL_TABLE_HEADERS,
+  getRuntimeModeLabel,
+} from "../copy/galAbstract";
 import { useProcessesData } from "../hooks/useProcessesData";
 import type { DashboardRuntimeView } from "../types/appData";
 
@@ -14,6 +22,9 @@ export default function ProcessesPage({
 }: ProcessesPageProps) {
   const { processes, runtime, refresh } = useProcessesData();
   const notice = getProcessesNotice(runtime);
+  const metricLabels = GAL_METRIC_LABELS.processes;
+  const pageCopy = GAL_PAGE_COPY.processes;
+  const tableHeaders = GAL_TABLE_HEADERS.processes;
 
   return (
     <div className="app-main">
@@ -21,13 +32,11 @@ export default function ProcessesPage({
         <header className="page-header">
           <div>
             <p className="page-eyebrow">{processes.cycleLabel}</p>
-            <h2>按进程聚合</h2>
+            <h2>{pageCopy.title}</h2>
+            <p className="page-copy">{pageCopy.lead}</p>
             <p className="page-copy">
-              当前页面已经接到进程聚合桥接，点击“查看详情”会把选中的
-              PID 带到详情页。
-            </p>
-            <p className="page-copy">
-              数据来源：{runtime.sourceLabel} · {runtime.lastUpdatedLabel}
+              {GAL_PAGE_COPY.common.battleReport}：{runtime.sourceLabel} ·{" "}
+              {runtime.lastUpdatedLabel}
             </p>
           </div>
           <div className="page-header-actions">
@@ -39,17 +48,22 @@ export default function ProcessesPage({
               }}
               disabled={runtime.isRefreshing}
             >
-              {runtime.isRefreshing ? "刷新中..." : "刷新列表"}
+              {runtime.isRefreshing
+                ? GAL_ACTION_COPY.processesRefresh.busy
+                : GAL_ACTION_COPY.processesRefresh.idle}
             </button>
             <div className="metric-row">
-              <MetricChip label="进程数" value={`${processes.items.length}`} />
               <MetricChip
-                label="已选 PID"
+                label={metricLabels.processCount}
+                value={`${processes.items.length}`}
+              />
+              <MetricChip
+                label={metricLabels.selectedPid}
                 value={selectedProcessId === null ? "-" : String(selectedProcessId)}
               />
               <MetricChip
-                label="数据源"
-                value={getRuntimeModeLabel(runtime)}
+                label={metricLabels.source}
+                value={getRuntimeModeLabel(runtime.mode)}
               />
             </div>
           </div>
@@ -66,24 +80,22 @@ export default function ProcessesPage({
       </section>
 
       <SectionCard
-        eyebrow="聚合列表"
-        title="进程流量总览"
-        summary="累计流量、目标数量、最近活跃时间和告警标记都会在这里展示。"
+        eyebrow={pageCopy.table.eyebrow}
+        title={pageCopy.table.title}
+        summary={pageCopy.table.summary}
       >
         {processes.items.length === 0 ? (
-          <div className="page-note">
-            当前没有可展示的进程聚合结果，等待下一次成功同步。
-          </div>
+          <div className="page-note">{pageCopy.table.empty}</div>
         ) : (
           <table className="table">
             <thead>
               <tr>
-                <th>进程</th>
-                <th>累计流量</th>
-                <th>目标数量</th>
-                <th>最近活跃</th>
-                <th>提醒标记</th>
-                <th>操作</th>
+                <th>{tableHeaders.process}</th>
+                <th>{tableHeaders.traffic}</th>
+                <th>{tableHeaders.destinations}</th>
+                <th>{tableHeaders.lastActive}</th>
+                <th>{tableHeaders.alert}</th>
+                <th>{tableHeaders.action}</th>
               </tr>
             </thead>
             <tbody>
@@ -95,7 +107,7 @@ export default function ProcessesPage({
                   <td>
                     {item.processName}
                     <br />
-                    <span className="table-subcopy">PID {item.pid}</span>
+                    <span className="table-subcopy">{`PID ${item.pid}`}</span>
                   </td>
                   <td>{item.totalTraffic}</td>
                   <td>{item.destinationCount}</td>
@@ -107,7 +119,7 @@ export default function ProcessesPage({
                       type="button"
                       onClick={() => onInspectProcess(item.pid)}
                     >
-                      查看详情
+                      {GAL_ACTION_COPY.processInspect}
                     </button>
                   </td>
                 </tr>
@@ -124,7 +136,7 @@ function getProcessesNotice(runtime: DashboardRuntimeView) {
   if (runtime.errorMessage) {
     return {
       tone: "error" as const,
-      title: "进程桥接异常",
+      title: GAL_NOTICE_COPY.processes.errorTitle,
       message: runtime.errorMessage,
     };
   }
@@ -132,41 +144,26 @@ function getProcessesNotice(runtime: DashboardRuntimeView) {
   if (runtime.isLoading) {
     return {
       tone: "normal" as const,
-      title: "正在同步进程聚合",
-      message: "前端正在等待 agentd 返回最新进程统计。",
+      title: GAL_NOTICE_COPY.processes.loadingTitle,
+      message: GAL_NOTICE_COPY.common.wait,
     };
   }
 
   if (runtime.mode === "mock") {
     return {
       tone: "normal" as const,
-      title: "当前展示模拟聚合",
-      message: "当前列表来自开发桥接快照，适合联调页面，不代表真实进程流量。",
+      title: GAL_NOTICE_COPY.common.mockTitle,
+      message: GAL_NOTICE_COPY.common.mockMessage,
     };
   }
 
   if (runtime.isFallback) {
     return {
       tone: "normal" as const,
-      title: "当前展示回退聚合",
-      message: "桥接未接管时，页面会保留回退进程列表方便继续联调。",
+      title: GAL_NOTICE_COPY.common.fallbackTitle,
+      message: GAL_NOTICE_COPY.common.fallbackMessage,
     };
   }
 
   return null;
-}
-
-function getRuntimeModeLabel(runtime: DashboardRuntimeView) {
-  switch (runtime.mode) {
-    case "live":
-      return "agentd";
-    case "mock":
-      return "模拟";
-    case "fallback":
-      return "回退";
-    case "connecting":
-      return "连接中";
-    case "disabled":
-      return "未启用";
-  }
 }

@@ -1,4 +1,7 @@
 import {
+  GAL_RUNTIME_COPY,
+} from "../copy/galAbstract";
+import {
   getFallbackDashboardData,
   resolveDashboardPayload,
 } from "../data/dashboard";
@@ -9,11 +12,11 @@ export function useDashboardData() {
     fallbackData: getFallbackDashboardData,
     loadWithBridge: async (bridge) =>
       resolveDashboardPayload(await bridge.loadDashboardPayload()),
-    bridgeMissingMessage: "桌面桥接尚未注入，当前展示前端回退快照。",
-    liveSourceLabel: "agentd 实时快照",
-    fallbackSourceLabel: "前端回退快照",
-    connectingSourceLabel: "正在连接 agentd",
-    initialSyncLabel: "首屏加载中",
+    bridgeMissingMessage: GAL_RUNTIME_COPY.bridgeMissingMessage,
+    liveSourceLabel: GAL_RUNTIME_COPY.liveSourceLabel,
+    fallbackSourceLabel: GAL_RUNTIME_COPY.fallbackSourceLabel,
+    connectingSourceLabel: GAL_RUNTIME_COPY.connectingSourceLabel,
+    initialSyncLabel: GAL_RUNTIME_COPY.dashboardInitialSyncLabel,
     pollIntervalMillis: 1_000,
   });
 

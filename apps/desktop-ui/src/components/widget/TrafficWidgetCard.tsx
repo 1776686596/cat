@@ -4,6 +4,14 @@ import type {
   RealtimeSnapshotView,
 } from "../../types/appData";
 import { resolveDesktopBridge } from "../../bridge/desktopBridge";
+import {
+  GAL_ACTION_COPY,
+  GAL_NOTICE_COPY,
+  GAL_PAGE_COPY,
+  formatSyncLabel,
+  getCaptureModeLabel,
+  getWidgetStateLabel,
+} from "../../copy/galAbstract";
 
 interface TrafficWidgetCardProps {
   snapshot: RealtimeSnapshotView;
@@ -64,8 +72,8 @@ export default function TrafficWidgetCard({
   const tone = getWidgetTone(snapshot.widgetState, runtime);
   const recentConnections = snapshot.activeConnections.slice(0, 3);
   const guidance = getWidgetGuidance(snapshot, runtime, primaryActionLabel);
-  const syncLabel = compressSyncLabel(runtime.lastUpdatedLabel);
-  const captureLabel = humanizeCaptureMode(snapshot.captureMode);
+  const syncLabel = formatSyncLabel(runtime.lastUpdatedLabel);
+  const captureLabel = getCaptureModeLabel(snapshot.captureMode);
   const showInlineList = mode === "compact";
 
   async function handleStartDragging() {
@@ -94,8 +102,8 @@ export default function TrafficWidgetCard({
               }
               void handleStartDragging();
             }}
-            aria-label="拖动挂件"
-            title="拖动挂件"
+            aria-label={GAL_ACTION_COPY.widget.drag}
+            title={GAL_ACTION_COPY.widget.drag}
           >
             ⋮⋮
           </button>
@@ -113,13 +121,13 @@ export default function TrafficWidgetCard({
             <TrafficCatGlyph tone={tone} />
           </div>
 
-          <div className="traffic-widget__summary">
-            <div className="traffic-widget__topline">
-              <span className="traffic-widget__state-pill">
-                {humanizeWidgetState(snapshot.widgetState)}
-              </span>
-              <span className="traffic-widget__meta">
-                {captureLabel} · {syncLabel}
+            <div className="traffic-widget__summary">
+              <div className="traffic-widget__topline">
+                <span className="traffic-widget__state-pill">
+                  {getWidgetStateLabel(snapshot.widgetState)}
+                </span>
+                <span className="traffic-widget__meta">
+                  {captureLabel} · {syncLabel}
               </span>
             </div>
 
@@ -144,8 +152,8 @@ export default function TrafficWidgetCard({
             type="button"
             onClick={onRefresh}
             disabled={refreshDisabled}
-            aria-label="刷新挂件快照"
-            title="刷新挂件快照"
+            aria-label={GAL_ACTION_COPY.widget.refresh}
+            title={GAL_ACTION_COPY.widget.refresh}
           >
             ↻
           </button>
@@ -155,13 +163,17 @@ export default function TrafficWidgetCard({
       <div className={`traffic-widget__details ${showInlineList ? "is-inline" : "is-panel"}`}>
         {!showInlineList ? (
           <div className="traffic-widget__popover-header">
-            <p>{mode === "panel" ? "最近流量" : primaryActionLabel}</p>
+            <p>
+              {mode === "panel"
+                ? GAL_ACTION_COPY.widget.hoverLabel
+                : primaryActionLabel}
+            </p>
             <span>{recentConnections.length} 条</span>
           </div>
         ) : null}
 
         {recentConnections.length === 0 ? (
-          <p className="traffic-widget__empty">当前还没有活跃连接。</p>
+          <p className="traffic-widget__empty">{GAL_ACTION_COPY.widget.empty}</p>
         ) : (
           <div className="traffic-widget__list">
             {recentConnections.map((item, index) => (
@@ -759,43 +771,12 @@ function getWidgetGuidance(
   primaryActionLabel: string,
 ) {
   if (runtime.errorMessage) {
-    return "桥接异常，优先检查诊断";
+    return GAL_NOTICE_COPY.widget.errorGuidance;
   }
   if (snapshot.captureMode === "proc_fallback") {
-    return "当前处于回退采集";
+    return GAL_NOTICE_COPY.widget.fallbackGuidance;
   }
-  return `${primaryActionLabel} · 悬停看最近流量`;
-}
-
-function humanizeWidgetState(widgetState: string) {
-  switch (normalizeWidgetState(widgetState)) {
-    case "idle":
-      return "待机";
-    case "download_active":
-      return "下载中";
-    case "upload_active":
-      return "上传中";
-    case "bidirectional_active":
-      return "双向活跃";
-    case "alerting":
-      return "告警";
-    default:
-      return "未知";
-  }
-}
-
-function humanizeCaptureMode(captureMode: string) {
-  if (captureMode === "proc_fallback") {
-    return "回退";
-  }
-  if (captureMode === "ebpf") {
-    return "eBPF";
-  }
-  return captureMode;
-}
-
-function compressSyncLabel(label: string) {
-  return label.replace("最近同步 ", "");
+  return `${primaryActionLabel} · ${GAL_PAGE_COPY.widget.hoverSuffix}`;
 }
 
 function normalizeWidgetState(widgetState: string) {

@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import type { AppView } from "../app/navigation";
 import TrafficWidgetCard from "../components/widget/TrafficWidgetCard";
+import { GAL_ACTION_COPY } from "../copy/galAbstract";
 import { useDashboardData } from "../hooks/useDashboardData";
 import type { DiagnosticsSnapshotView } from "../types/appData";
 
@@ -32,10 +33,10 @@ export default function WidgetPage({ onOpenDashboard }: WidgetPageProps) {
         runtime={runtime}
         primaryActionLabel={
           isOpening
-            ? "打开中..."
+            ? GAL_ACTION_COPY.widget.opening
             : targetView === "diagnostics"
-              ? "进入诊断"
-              : "打开主界面"
+              ? GAL_ACTION_COPY.widget.openDiagnostics
+              : GAL_ACTION_COPY.widget.openDashboard
         }
         onPrimaryAction={() => {
           void handleOpenDashboard();

@@ -3,6 +3,13 @@ import { useState } from "react";
 import type { AgentHistoryQuery } from "../bridge/desktopBridge";
 import MetricChip from "../components/common/MetricChip";
 import SectionCard from "../components/common/SectionCard";
+import {
+  GAL_ACTION_COPY,
+  GAL_METRIC_LABELS,
+  GAL_NOTICE_COPY,
+  GAL_PAGE_COPY,
+  GAL_TABLE_HEADERS,
+} from "../copy/galAbstract";
 import { useHistoryData } from "../hooks/useHistoryData";
 import type { DashboardRuntimeView, HistoryPageView } from "../types/appData";
 
@@ -51,6 +58,9 @@ export default function HistoryPage({
   const visibleStart = history.total === 0 ? 0 : history.offset + 1;
   const visibleEnd = history.offset + history.items.length;
   const canExport = history.items.length > 0;
+  const metricLabels = GAL_METRIC_LABELS.history;
+  const pageCopy = GAL_PAGE_COPY.history;
+  const tableHeaders = GAL_TABLE_HEADERS.history;
 
   return (
     <div className="app-main">
@@ -58,12 +68,11 @@ export default function HistoryPage({
         <header className="page-header">
           <div>
             <p className="page-eyebrow">{history.cycleLabel}</p>
-            <h2>历史检索</h2>
+            <h2>{pageCopy.title}</h2>
+            <p className="page-copy">{pageCopy.lead}</p>
             <p className="page-copy">
-              当前已经支持组合过滤与分页，带 PID 的记录还能直接跳到单进程详情页。
-            </p>
-            <p className="page-copy">
-              数据来源：{runtime.sourceLabel} · {runtime.lastUpdatedLabel}
+              {GAL_PAGE_COPY.common.battleReport}：{runtime.sourceLabel} ·{" "}
+              {runtime.lastUpdatedLabel}
             </p>
           </div>
           <div className="page-header-actions">
@@ -75,17 +84,22 @@ export default function HistoryPage({
               }}
               disabled={runtime.isRefreshing}
             >
-              {runtime.isRefreshing ? "刷新中..." : "刷新历史"}
+              {runtime.isRefreshing
+                ? GAL_ACTION_COPY.historyRefresh.busy
+                : GAL_ACTION_COPY.historyRefresh.idle}
             </button>
             <div className="metric-row">
-              <MetricChip label="总会话" value={`${history.total}`} />
-              <MetricChip label="本页条数" value={`${history.items.length}`} />
+              <MetricChip label={metricLabels.total} value={`${history.total}`} />
               <MetricChip
-                label="分页"
+                label={metricLabels.pageSize}
+                value={`${history.items.length}`}
+              />
+              <MetricChip
+                label={metricLabels.page}
                 value={`${Math.floor(history.offset / Math.max(1, history.limit)) + 1}`}
               />
               <MetricChip
-                label="已选 PID"
+                label={metricLabels.selectedPid}
                 value={selectedProcessId === null ? "-" : String(selectedProcessId)}
               />
             </div>
@@ -103,9 +117,9 @@ export default function HistoryPage({
       </section>
 
       <SectionCard
-        eyebrow="过滤条件"
-        title="最近历史会话"
-        summary="支持进程名、目标、端口、方向、时间范围和局域网开关，翻页和导出时都会保留当前筛选条件。"
+        eyebrow={pageCopy.filters.eyebrow}
+        title={pageCopy.filters.title}
+        summary={pageCopy.filters.summary}
       >
         <form
           className="filters-grid"
@@ -115,7 +129,7 @@ export default function HistoryPage({
           }}
         >
           <label className="field-group">
-            <span className="field-label">进程名</span>
+            <span className="field-label">{pageCopy.filters.processName}</span>
             <input
               className="field-input"
               value={draft.processName}
@@ -125,12 +139,12 @@ export default function HistoryPage({
                   processName: event.target.value,
                 }))
               }
-              placeholder="firefox / syncthing"
+              placeholder={pageCopy.filters.placeholders.processName}
             />
           </label>
 
           <label className="field-group">
-            <span className="field-label">目标</span>
+            <span className="field-label">{pageCopy.filters.target}</span>
             <input
               className="field-input"
               value={draft.target}
@@ -140,12 +154,12 @@ export default function HistoryPage({
                   target: event.target.value,
                 }))
               }
-              placeholder="域名或 IP"
+              placeholder={pageCopy.filters.placeholders.target}
             />
           </label>
 
           <label className="field-group">
-            <span className="field-label">端口</span>
+            <span className="field-label">{pageCopy.filters.port}</span>
             <input
               className="field-input"
               inputMode="numeric"
@@ -156,12 +170,12 @@ export default function HistoryPage({
                   port: event.target.value,
                 }))
               }
-              placeholder="443"
+              placeholder={pageCopy.filters.placeholders.port}
             />
           </label>
 
           <label className="field-group">
-            <span className="field-label">方向</span>
+            <span className="field-label">{pageCopy.filters.direction}</span>
             <select
               className="field-input"
               value={draft.direction}
@@ -172,14 +186,14 @@ export default function HistoryPage({
                 }))
               }
             >
-              <option value="all">全部</option>
-              <option value="outbound">上行</option>
-              <option value="inbound">下行</option>
+              <option value="all">{pageCopy.filters.directions.all}</option>
+              <option value="outbound">{pageCopy.filters.directions.outbound}</option>
+              <option value="inbound">{pageCopy.filters.directions.inbound}</option>
             </select>
           </label>
 
           <label className="field-group">
-            <span className="field-label">开始时间</span>
+            <span className="field-label">{pageCopy.filters.startedAfter}</span>
             <input
               className="field-input"
               type="datetime-local"
@@ -194,7 +208,7 @@ export default function HistoryPage({
           </label>
 
           <label className="field-group">
-            <span className="field-label">结束时间</span>
+            <span className="field-label">{pageCopy.filters.endedBefore}</span>
             <input
               className="field-input"
               type="datetime-local"
@@ -209,7 +223,7 @@ export default function HistoryPage({
           </label>
 
           <label className="field-group">
-            <span className="field-label">每页条数</span>
+            <span className="field-label">{pageCopy.filters.limit}</span>
             <select
               className="field-input"
               value={draft.limit}
@@ -237,12 +251,12 @@ export default function HistoryPage({
                 }))
               }
             />
-            <span>包含局域网流量</span>
+            <span>{pageCopy.filters.includeLanTraffic}</span>
           </label>
 
           <div className="inline-actions">
             <button className="action-button" type="submit">
-              应用筛选
+              {GAL_ACTION_COPY.historyApply}
             </button>
             <button
               className="table-action"
@@ -253,14 +267,14 @@ export default function HistoryPage({
                 setQuery(buildHistoryQuery(resetDraft));
               }}
             >
-              重置
+              {GAL_ACTION_COPY.historyReset}
             </button>
           </div>
         </form>
 
         <div className="pagination-row">
           <span className="table-subcopy">
-            当前显示 {visibleStart}
+            {pageCopy.page.visiblePrefix} {visibleStart}
             {" - "}
             {visibleEnd} / {history.total}
           </span>
@@ -278,9 +292,9 @@ export default function HistoryPage({
                 });
                 setLastExportLabel(buildExportStatusLabel("JSON", history.items.length));
               }}
-              title="导出当前页筛选结果为 JSON"
+              title={pageCopy.page.exportJsonTitle}
             >
-              导出 JSON
+              {GAL_ACTION_COPY.historyExportJson}
             </button>
             <button
               className="table-action"
@@ -295,9 +309,9 @@ export default function HistoryPage({
                 });
                 setLastExportLabel(buildExportStatusLabel("CSV", history.items.length));
               }}
-              title="导出当前页筛选结果为 CSV"
+              title={pageCopy.page.exportCsvTitle}
             >
-              导出 CSV
+              {GAL_ACTION_COPY.historyExportCsv}
             </button>
             <button
               className="table-action"
@@ -310,7 +324,7 @@ export default function HistoryPage({
                 }));
               }}
             >
-              上一页
+              {GAL_ACTION_COPY.historyPrev}
             </button>
             <button
               className="table-action"
@@ -323,30 +337,29 @@ export default function HistoryPage({
                 }));
               }}
             >
-              下一页
+              {GAL_ACTION_COPY.historyNext}
             </button>
           </div>
         </div>
         <p className="table-subcopy">
-          导出只包含当前页已加载的 {history.items.length} 条记录，文件里会保留当前筛选参数。
-          {lastExportLabel ? ` 最近导出：${lastExportLabel}` : ""}
+          {pageCopy.page.exportHintPrefix} {history.items.length}{" "}
+          {pageCopy.page.exportHintSuffix}
+          {lastExportLabel ? ` ${pageCopy.page.exportRecentPrefix}${lastExportLabel}` : ""}
         </p>
 
         {history.items.length === 0 ? (
-          <div className="page-note">
-            当前没有历史会话，可能是 agentd 还未累计到可展示的数据。
-          </div>
+          <div className="page-note">{pageCopy.page.empty}</div>
         ) : (
           <table className="table">
             <thead>
               <tr>
-                <th>进程</th>
-                <th>目标</th>
-                <th>方向</th>
-                <th>协议</th>
-                <th>时间</th>
-                <th>累计流量</th>
-                <th>操作</th>
+                <th>{tableHeaders.process}</th>
+                <th>{tableHeaders.target}</th>
+                <th>{tableHeaders.direction}</th>
+                <th>{tableHeaders.protocol}</th>
+                <th>{tableHeaders.time}</th>
+                <th>{tableHeaders.traffic}</th>
+                <th>{tableHeaders.action}</th>
               </tr>
             </thead>
             <tbody>
@@ -363,7 +376,7 @@ export default function HistoryPage({
                     {item.processName}
                     <br />
                     <span className="table-subcopy">
-                      {item.pid === null ? "PID 未知" : `PID ${item.pid}`}
+                      {item.pid === null ? pageCopy.page.pidUnknown : `PID ${item.pid}`}
                     </span>
                   </td>
                   <td>{item.target}</td>
@@ -383,11 +396,13 @@ export default function HistoryPage({
                       disabled={item.pid === null}
                       title={
                         item.pid === null
-                          ? "当前历史记录缺少 PID，暂时无法查看详情。"
-                          : `查看 PID ${item.pid} 的详情`
+                          ? pageCopy.page.inspectMissingTitle
+                          : `${pageCopy.page.inspectTitlePrefix} ${item.pid}`
                       }
                     >
-                      {item.pid === null ? "PID 缺失" : "查看详情"}
+                      {item.pid === null
+                        ? GAL_ACTION_COPY.historyInspectMissing
+                        : GAL_ACTION_COPY.historyInspect}
                     </button>
                   </td>
                 </tr>
@@ -404,7 +419,7 @@ function getHistoryNotice(runtime: DashboardRuntimeView) {
   if (runtime.errorMessage) {
     return {
       tone: "error" as const,
-      title: "历史桥接异常",
+      title: GAL_NOTICE_COPY.history.errorTitle,
       message: runtime.errorMessage,
     };
   }
@@ -412,24 +427,24 @@ function getHistoryNotice(runtime: DashboardRuntimeView) {
   if (runtime.isLoading) {
     return {
       tone: "normal" as const,
-      title: "正在同步历史分页",
-      message: "前端正在等待 agentd 返回历史会话列表。",
+      title: GAL_NOTICE_COPY.history.loadingTitle,
+      message: GAL_NOTICE_COPY.common.wait,
     };
   }
 
   if (runtime.mode === "mock") {
     return {
       tone: "normal" as const,
-      title: "当前展示模拟历史",
-      message: "历史结果来自开发桥接快照，筛选和分页链路可验证，但不代表真实会话。",
+      title: GAL_NOTICE_COPY.common.mockTitle,
+      message: GAL_NOTICE_COPY.common.mockMessage,
     };
   }
 
   if (runtime.isFallback) {
     return {
       tone: "normal" as const,
-      title: "当前展示回退历史",
-      message: "桥接未接管时，页面会展示本地示例会话结构。",
+      title: GAL_NOTICE_COPY.common.fallbackTitle,
+      message: GAL_NOTICE_COPY.common.fallbackMessage,
     };
   }
 
