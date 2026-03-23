@@ -15,10 +15,10 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 安装 Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 20
           cache: npm
@@ -41,6 +41,7 @@ jobs:
             patchelf
 
       - name: 构建桌面包
+        id: tauri-build
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -48,5 +49,13 @@ jobs:
           projectPath: apps/desktop-ui
           tauriScript: npm run tauri
           args: --bundles deb,appimage
-          uploadWorkflowArtifacts: true
           includeDebug: false
+
+      - name: 上传 Linux 安装包到 Actions
+        uses: actions/upload-artifact@v4
+        with:
+          name: traffic-cat-linux-bundles
+          if-no-files-found: error
+          path: |
+            apps/desktop-ui/src-tauri/target/release/bundle/deb/*.deb
+            apps/desktop-ui/src-tauri/target/release/bundle/appimage/*.AppImage
