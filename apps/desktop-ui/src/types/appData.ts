@@ -6,8 +6,11 @@ export interface RealtimeConnectionItem {
   direction: string;
   protocol: string;
   uploadRate: string;
+  uploadRateValue: number;
   downloadRate: string;
+  downloadRateValue: number;
   totalRate: string;
+  totalRateValue: number;
   lastSeenLabel: string;
 }
 

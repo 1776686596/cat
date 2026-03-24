@@ -11,6 +11,7 @@ import {
   getRealtimeRuntimeLabel,
   getWidgetStateLabel,
 } from "../copy/galAbstract";
+import { useWidgetLayoutMode } from "../hooks/useWidgetLayoutMode";
 import type {
   DashboardRuntimeView,
   RealtimeSnapshotView,
@@ -28,6 +29,7 @@ export default function RealtimePage({
   onRefresh,
 }: RealtimePageProps) {
   const notice = getRealtimeNotice(snapshot, runtime);
+  const { layoutMode, setLayoutMode } = useWidgetLayoutMode();
   const realtimeMetricLabels = GAL_METRIC_LABELS.realtime;
   const realtimePageCopy = GAL_PAGE_COPY.realtime;
   const spotlightCards = [
@@ -156,6 +158,33 @@ export default function RealtimePage({
             <p className="section-summary">{realtimePageCopy.widgetPreviewSummary}</p>
 
             <div className="widget-preview-points">
+              <div className="widget-preview-mode">
+                <div className="widget-preview-mode__copy">
+                  <strong>{realtimePageCopy.widgetModeTitle}</strong>
+                  <span>{realtimePageCopy.widgetModeSummary}</span>
+                </div>
+                <div className="widget-preview-mode__switch" aria-label={realtimePageCopy.widgetModeTitle}>
+                  <button
+                    className={`widget-preview-mode__button ${layoutMode === "character-first" ? "is-active" : ""}`.trim()}
+                    type="button"
+                    onClick={() => {
+                      setLayoutMode("character-first");
+                    }}
+                  >
+                    {realtimePageCopy.widgetModeCharacterLabel}
+                  </button>
+                  <button
+                    className={`widget-preview-mode__button ${layoutMode === "ranking-first" ? "is-active" : ""}`.trim()}
+                    type="button"
+                    onClick={() => {
+                      setLayoutMode("ranking-first");
+                    }}
+                  >
+                    {realtimePageCopy.widgetModeRankingLabel}
+                  </button>
+                </div>
+              </div>
+
               <div className="widget-preview-point">
                 <strong>{realtimePageCopy.widgetPoints.idleTitle}</strong>
                 <span>{realtimePageCopy.widgetPoints.idleCopy}</span>
@@ -178,6 +207,7 @@ export default function RealtimePage({
             snapshot={snapshot}
             runtime={runtime}
             mode="panel"
+            layoutMode={layoutMode}
             primaryActionLabel={GAL_ACTION_COPY.realtimeOpenWidget}
             onPrimaryAction={openWidgetPreview}
             onRefresh={onRefresh}

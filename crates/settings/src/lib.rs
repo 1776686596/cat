@@ -7,6 +7,6 @@ pub use agent::{
     DEFAULT_RETENTION_DAYS, DEFAULT_RUNTIME_DIR, DEFAULT_SOCKET_PATH,
 };
 pub use ui::{
-    NotificationPreferences, UiSettings, WidgetPosition, WidgetPreferences, WindowFrame,
-    WindowPreferences, DEFAULT_UI_CONFIG_RELATIVE_PATH,
+    NotificationPreferences, UiSettings, WidgetLayoutMode, WidgetPosition, WidgetPreferences,
+    WindowFrame, WindowPreferences, DEFAULT_UI_CONFIG_RELATIVE_PATH,
 };

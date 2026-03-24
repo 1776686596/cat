@@ -70,6 +70,10 @@ export const GAL_PAGE_COPY = {
     widgetPreviewEyebrow: "挂件剧透",
     widgetPreviewTitle: "挂件预览",
     widgetPreviewSummary: "平时装乖，一靠近就全招。",
+    widgetModeTitle: "挂件构图",
+    widgetModeSummary: "默认让亚托莉压场，想盯榜时再切成排行优先。",
+    widgetModeCharacterLabel: "角色优先",
+    widgetModeRankingLabel: "排行优先",
     widgetPoints: {
       idleTitle: "默认态",
       idleCopy: "先假装岁月静好。",
@@ -355,9 +359,9 @@ export const GAL_ACTION_COPY = {
     busy: "抢救中...",
   },
   widget: {
-    drag: "拽着猫走",
+    drag: "拖拽挂件",
     refresh: "再抓一轮",
-    hoverLabel: "最近整活",
+    hoverLabel: "流量排行",
     empty: "这会儿还没人整活。",
     openDashboard: "回主场",
     openDiagnostics: "进去抢救",

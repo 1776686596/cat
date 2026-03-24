@@ -8,6 +8,13 @@ pub struct WidgetPosition {
     pub y: i32,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum WidgetLayoutMode {
+    #[default]
+    CharacterFirst,
+    RankingFirst,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct WidgetPreferences {
     pub position: WidgetPosition,
@@ -16,6 +23,9 @@ pub struct WidgetPreferences {
     pub active_opacity_percent: u8,
     pub compact_width: u16,
     pub compact_height: u16,
+    pub layout_mode: WidgetLayoutMode,
+    pub character_enabled: bool,
+    pub bubble_enabled: bool,
 }
 
 impl Default for WidgetPreferences {
@@ -25,8 +35,11 @@ impl Default for WidgetPreferences {
             show_lan_traffic: false,
             idle_opacity_percent: 55,
             active_opacity_percent: 100,
-            compact_width: 220,
-            compact_height: 180,
+            compact_width: 320,
+            compact_height: 340,
+            layout_mode: WidgetLayoutMode::CharacterFirst,
+            character_enabled: true,
+            bubble_enabled: true,
         }
     }
 }
