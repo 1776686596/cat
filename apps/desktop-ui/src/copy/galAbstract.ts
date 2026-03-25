@@ -4,400 +4,428 @@ export const GAL_NAV_ITEMS = [
   {
     key: "realtime",
     label: "实时流向",
-    copy: "先逮住偷跑流量的家伙。",
+    copy: "把刚发生的联网动静先收拢住。",
   },
   {
     key: "processes",
     label: "进程聚合",
-    copy: "这锅今天必须有人背。",
+    copy: "从进程视角看谁最活跃、谁最异常。",
   },
   {
     key: "process-detail",
     label: "进程详情",
-    copy: "锁死一个 PID 往死里看。",
+    copy: "放大单个进程的连接、历史和提醒。",
   },
   {
     key: "history",
     label: "历史检索",
-    copy: "翻旧账模式，启动。",
+    copy: "把过去发生过的联网记录重新翻出来。",
   },
   {
     key: "diagnostics",
     label: "诊断",
-    copy: "寄了别慌，先查链路。",
+    copy: "检查平台支持、权限和守护进程状态。",
   },
 ] as const;
 
 export const GAL_SHELL_COPY = {
-  title: "嘎啦 game 里不是这样的！",
-  subtitle: "攻略失败，现实没有读档，但这锅总得查清。",
+  title: "Traffic Cat 守望席",
+  subtitle: "把桌面上悄悄联网的动静，变成一眼就能看见的值守感。",
   cards: {
-    focus: "当前番位",
-    source: "情报源",
-    sync: "刚抓到",
-    selectedPid: "锁定目标",
+    focus: "当前区域",
+    platform: "当前平台",
+    capability: "观测能力",
+    sync: "最近同步",
+    selectedPid: "锁定进程",
   },
   selectedPidEmpty: "未锁定",
-  noSelectedProcessHint: "想贴脸看详情？先去进程聚合挑个 PID。",
-  lockedProcessTitle: "先去进程聚合锁个人",
+  noSelectedProcessHint: "想看单进程详情，先去进程聚合挑一个目标。",
+  lockedProcessTitle: "先从进程聚合页选择一个进程",
   actions: {
-    refreshIdle: "再抓一轮",
-    refreshBusy: "重抓中...",
+    refreshIdle: "刷新状态",
+    refreshBusy: "刷新中...",
   },
   banners: {
     mock: {
-      title: "当前是模拟档，先代餐一下。",
-      message: "先看界面，数字别太入戏。",
+      title: "当前展示示意数据",
+      message: "可以先体验界面与交互，联网数字暂不代表真实状态。",
     },
     live: {
-      title: "这次不是代餐，是真家伙。",
-      message: "dev bridge 已经把 agentd 接上了。",
+      title: "已接入真实观测链路",
+      message: "当前界面正在读取桌面守护进程的真实快照。",
     },
     fallback: {
-      title: "桥接寄了，先拿回退档顶班。",
-      message: "能看结构，别信数字。",
+      title: "当前处于回退观测",
+      message: "基础动静仍然可见，但精度和覆盖面会低于完整采集。",
     },
   },
 } as const;
 
 export const GAL_PAGE_COPY = {
   common: {
-    battleReport: "本轮战报",
+    battleReport: "当前观察",
   },
   realtime: {
     title: "实时流向",
-    lead: "谁在偷跑流量，一眼逮捕。",
+    lead: "把现在最值得盯住的联网动静、挂件状态和部署准备度放到同一屏里。",
     widgetPreviewEyebrow: "挂件剧透",
     widgetPreviewTitle: "挂件预览",
-    widgetPreviewSummary: "平时装乖，一靠近就全招。",
+    widgetPreviewSummary: "平时安静值守，一靠近就把榜首和提醒交出来。",
     widgetModeTitle: "挂件构图",
-    widgetModeSummary: "默认让亚托莉压场，想盯榜时再切成排行优先。",
+    widgetModeSummary: "默认让角色压场，想优先盯榜时再切成排行优先。",
     widgetModeCharacterLabel: "角色优先",
     widgetModeRankingLabel: "排行优先",
+    widgetEditorTitle: "人物站位",
+    widgetEditorSummary: "直接拖动右侧角色摆位，下面调尺寸和榜单层透明度，挂件页会同步记住。",
+    widgetEditorScaleLabel: "人物尺寸",
+    widgetEditorOverlayOpacityLabel: "排行面板透明度",
+    widgetEditorResetLabel: "恢复默认",
+    widgetEditorHint: "拖动角色调整位置，滚轮或滑杆微调大小，排行层也能单独调透明。",
     widgetPoints: {
       idleTitle: "默认态",
-      idleCopy: "先假装岁月静好。",
+      idleCopy: "安静值守，不抢镜。",
       hoverTitle: "悬停态",
-      hoverCopy: "你一靠近，它就全盘托出。",
+      hoverCopy: "靠近一点，就把最该看的连接交给你。",
       currentTitle: "当前快照",
+    },
+    setup: {
+      eyebrow: "首装护航",
+      title: "把平台、权限和采集准备度一次看清",
+      summary: "先确认这台机器已经具备多少真实观测能力，再决定下一步补哪里。",
+    },
+    focus: {
+      eyebrow: "当前重点",
+      title: "现在最值得看的三件事",
+      summary: "别一上来埋进表格，先把值守结论和下一步动作看清楚。",
     },
     spotlight: {
       noHotspot: "暂无热点",
-      liveDetailSuffix: "正在 C 位输出",
-      fallbackCaptureDetail: "UDP / QUIC 可能偏低",
-      liveCaptureDetail: "这轮数据不像在演我",
+      liveDetailSuffix: "正在占据前排",
+      fallbackCaptureDetail: "当前先按轻量回退模式理解这批数据",
+      liveCaptureDetail: "当前这轮数据来自真实观测链路",
     },
     hotspot: {
       eyebrow: "活跃连接",
       title: "当前热点流量",
-      summary: "这波是谁在 C 位输出。",
+      summary: "把现在最热的连接按连接级别摊开来看。",
       badgeSuffix: "条活跃连接",
-      empty: "风平浪静，暂时没人整活。",
+      empty: "现在还没有值得盯住的活跃连接。",
     },
   },
   processes: {
     title: "按进程聚合",
-    lead: "这锅谁背，今天必须查清。",
+    lead: "从进程维度看谁最活跃、谁最常去外网、谁带着提醒。",
     table: {
       eyebrow: "聚合列表",
       title: "进程流量总览",
-      summary: "该背锅的，一个都别想跑。",
-      empty: "这会儿还没人跳脸。",
+      summary: "把需要放大的进程先筛出来，再进入详情页深看。",
+      empty: "当前还没有形成可聚合的进程流量。",
       pidUnknown: "PID 未知",
     },
   },
   history: {
     title: "历史检索",
-    lead: "翻旧账模式启动，谁都别想装无事发生。",
+    lead: "回查过去发生过的连接、时间范围和流量规模。",
     filters: {
       eyebrow: "过滤条件",
       title: "最近历史会话",
-      summary: "旧账这种东西，翻起来要讲证据。",
-      processName: "谁在整活",
-      target: "去找谁",
-      port: "哪路端口",
-      direction: "往哪跑",
-      startedAfter: "开演时间",
-      endedBefore: "收工时间",
-      limit: "每页几条",
-      includeLanTraffic: "局域网也算",
+      summary: "先收窄范围，再把有价值的旧记录导出来。",
+      processName: "进程名",
+      target: "目标地址",
+      port: "目标端口",
+      direction: "方向",
+      startedAfter: "开始时间",
+      endedBefore: "结束时间",
+      limit: "每页数量",
+      includeLanTraffic: "包含局域网流量",
       placeholders: {
         processName: "firefox / syncthing",
         target: "域名或 IP",
         port: "443",
       },
       directions: {
-        all: "都算",
-        outbound: "往外冲",
-        inbound: "往回灌",
+        all: "全部",
+        outbound: "出站",
+        inbound: "入站",
       },
     },
     page: {
       visiblePrefix: "当前显示",
-      exportHintPrefix: "这次能打包带走",
+      exportHintPrefix: "本页可导出",
       exportHintSuffix: "条记录。",
       exportRecentPrefix: "最近导出：",
-      empty: "这页旧账还没翻到证据。",
+      empty: "这页还没有命中任何历史记录。",
       pidUnknown: "PID 未知",
-      exportJsonTitle: "把这页记录打包成 JSON",
-      exportCsvTitle: "把这页记录打包成 CSV",
-      inspectMissingTitle: "这条记录没 PID，暂时贴不了脸。",
-      inspectTitlePrefix: "贴脸看 PID",
+      exportJsonTitle: "把当前页导出成 JSON",
+      exportCsvTitle: "把当前页导出成 CSV",
+      inspectMissingTitle: "这条记录没有 PID，暂时无法跳详情。",
+      inspectTitlePrefix: "查看 PID",
     },
   },
   processDetail: {
     title: "单进程详情",
-    lead: "锁死一个 PID，开始近距离拷打。",
+    lead: "把单个进程的会话、历史和提醒放到一页里看清。",
     profile: {
       eyebrow: "基础信息",
       title: "进程画像",
-      summary: "先确认这位到底是谁。",
-      empty: "先去进程聚合挑个 PID，再回来贴脸看。",
+      summary: "先确认这是谁、最近什么时候还在联网。",
+      empty: "先去进程聚合选择一个进程，再回来查看详情。",
     },
     sessions: {
       eyebrow: "活跃连接",
       title: "当前进程会话",
-      summary: "看看它最近都在和谁眉来眼去。",
-      emptyBadge: "等你锁人",
+      summary: "看它现在正在连谁、流量有多大、最近什么时候活跃。",
+      emptyBadge: "等待目标",
       badgeSuffix: "条连接",
-      empty: "这会儿它装得还挺乖。",
+      empty: "当前这个进程没有活跃连接。",
     },
     alerts: {
-      eyebrow: "相关告警",
+      eyebrow: "相关提醒",
       title: "最近触发记录",
-      summary: "翻翻它最近又惹了什么事。",
-      empty: "最近还算老实，暂时没惹事。",
-      itemTitle: "红温记录",
+      summary: "把近期值得回看的告警记录单独拎出来。",
+      empty: "最近没有命中新的提醒。",
+      itemTitle: "提醒记录",
     },
   },
   diagnostics: {
     title: "诊断",
-    lead: "寄了别慌，先查桥接，再看权限。",
+    lead: "把平台支持、权限状态、采集能力和下一步动作拆开看清楚。",
     runtime: {
-      connectionEyebrow: "连接状态",
-      connectionTitle: "UI 与 agentd",
-      connectionSummary: "先看这条线是不是还活着。",
-      permissionEyebrow: "权限与能力",
-      permissionTitle: "采集前置条件",
-      permissionSummary: "再看是不是权限在卡你。",
-      degradedFallback: "当前还没报寄因，先当它在装死。",
+      platformEyebrow: "平台支持",
+      platformTitle: "当前平台与支持阶段",
+      platformSummary: "先确认这台机器属于哪个平台，以及这条产品线现在支持到什么程度。",
+      capabilityEyebrow: "观测能力",
+      capabilityTitle: "当前能看到多少真实状态",
+      capabilitySummary: "把守护进程、权限和采集模式合在一起判断，别只看单一指标。",
+      nextEyebrow: "下一步",
+      nextTitle: "优先补这一处",
+      nextSummary: "先做最能提升真实观测能力的那一步，避免在噪音里打转。",
+      checklistEyebrow: "启动检查",
+      checklistTitle: "把值守链路逐项对齐",
+      checklistSummary: "这四项都稳住后，挂件才适合长期常驻在桌面上。",
+      degradedFallback: "当前还没拿到明确的降级原因，建议先检查链路和权限。",
       permissionLabel: "权限状态",
+      socketLabel: "桌面桥接",
+      databaseLabel: "历史存档",
     },
   },
   widget: {
-    panelHeader: "最近整活",
-    hoverSuffix: "悬停看最近整活",
+    panelHeader: "最近动静",
+    hoverSuffix: "悬停看最近热点",
   },
 } as const;
 
 export const GAL_NOTICE_COPY = {
   common: {
-    wait: "再等一下下。",
-    mockTitle: "当前是模拟档",
-    mockMessage: "代餐可以，别真情实感。",
-    fallbackTitle: "当前是回退档",
-    fallbackMessage: "桥接寄了，先拿占位数据撑场面。",
+    wait: "再等一会，正在拉最新状态。",
+    mockTitle: "当前展示示意数据",
+    mockMessage: "可以先体验界面和交互，数字暂不代表真实联网状态。",
+    fallbackTitle: "当前处于回退观测",
+    fallbackMessage: "基础连接仍然可见，但精度和覆盖面会低于完整采集。",
   },
   realtime: {
-    errorTitle: "实时桥接寄了",
-    loadingTitle: "正在抓现行",
-    zeroRateTitle: "连接到了，速率还在装死",
-    zeroRateMessage: "想看真速率，得给 agentd 上 sudo 或 capability。",
-    fallbackCaptureTitle: "抓到 UDP / QUIC 了",
-    fallbackCaptureMessage: "现在还是 /proc 回退模式，数值可能有点演。",
+    errorTitle: "实时链路异常",
+    loadingTitle: "正在同步实时快照",
+    zeroRateTitle: "连接已经出现，但速率还没拿到",
+    zeroRateMessage: "想看到可信的实时速率，需要给 agentd 补 sudo 或 capability。",
+    fallbackCaptureTitle: "当前为回退采集",
+    fallbackCaptureMessage: "现在仍以 /proc 方案值守，UDP / QUIC 的表现可能偏保守。",
   },
   processes: {
-    errorTitle: "进程桥接寄了",
-    loadingTitle: "正在清点嫌疑人",
+    errorTitle: "进程列表加载失败",
+    loadingTitle: "正在同步进程列表",
   },
   history: {
-    errorTitle: "历史桥接寄了",
-    loadingTitle: "正在翻旧账",
+    errorTitle: "历史检索加载失败",
+    loadingTitle: "正在同步历史记录",
   },
   processDetail: {
-    errorTitle: "详情桥接寄了",
-    unselectedTitle: "还没锁定目标",
-    unselectedMessage: "先去进程聚合页挑个 PID 再说。",
-    loadingTitle: "正在近距离拷打",
+    errorTitle: "进程详情加载失败",
+    unselectedTitle: "还没有选中进程",
+    unselectedMessage: "先去进程聚合页选一个进程，再回来查看详情。",
+    loadingTitle: "正在同步进程详情",
   },
   diagnostics: {
-    errorTitle: "诊断桥接寄了",
-    loadingTitle: "正在抢救现场",
+    errorTitle: "诊断状态加载失败",
+    loadingTitle: "正在重新检测",
   },
   widget: {
-    errorGuidance: "桥接寄了，先去抢救。",
-    fallbackGuidance: "现在是回退档，数字可能在演。",
+    errorGuidance: "链路异常，先打开诊断页补齐连接。",
+    fallbackGuidance: "当前处于回退观测，先看趋势，再补完整授权。",
   },
 } as const;
 
 export const GAL_EPISODE_SCENES = {
-  dashboardRealtimeLive: "真档接线",
-  dashboardRealtimeFallback: "回退顶班",
-  dashboardDiagnosticsLive: "真档自检",
+  dashboardRealtimeLive: "真实值守",
+  dashboardRealtimeFallback: "回退值守",
+  dashboardDiagnosticsLive: "真实自检",
   dashboardDiagnosticsFallback: "回退自检",
-  processesLive: "真档点名",
-  processesFallback: "回退点名",
-  historyLive: "真档翻账",
-  historyFallback: "回退翻账",
-  processDetailLive: "真档贴脸",
-  processDetailFallback: "回退贴脸",
-  processDetailDisabled: "还没锁人",
+  processesLive: "真实清单",
+  processesFallback: "回退清单",
+  historyLive: "真实回查",
+  historyFallback: "回退回查",
+  processDetailLive: "真实详情",
+  processDetailFallback: "回退详情",
+  processDetailDisabled: "等待选择进程",
 } as const;
 
 export const GAL_MOCK_COPY = {
   dashboard: {
-    noHeadline: "这会儿还没人整活",
-    fallbackHeadline: "agentd 还没上桌，先别急",
-    fallbackDegradedReason: "现在走 /proc 回退档，精度确实有点演。",
-    fallbackPermissionSummary: "权限和目录都还行，只是现在走回退档。",
-    fallbackPermissionDetail: "真体检还没接进来，先看这份代餐报告。",
+    noHeadline: "当前还没有需要放大的活跃连接",
+    fallbackHeadline: "agentd 还没接上线，先用回退观测占位",
+    fallbackDegradedReason: "当前走 /proc 回退模式，精度和覆盖面会低于完整采集。",
+    fallbackPermissionSummary: "目录和基础权限可用，但采集仍处于回退观测阶段。",
+    fallbackPermissionDetail: "真实权限体检还没接进来，先把这份示意报告当成占位信息。",
   },
   processDetail: {
-    fallbackAlertSyncthing: "它挂后台挂太久了，建议盯一眼。",
-    fallbackAlertCurl: "第一次连到 1.1.1.1，先记进小本本。",
+    fallbackAlertSyncthing: "后台持续通信时间较长，建议进一步确认用途。",
+    fallbackAlertCurl: "第一次连到 1.1.1.1，建议记录这次外连。",
   },
   bridge: {
     sourceLabel: "开发桥接快照",
-    permissionDetails: "开发桥接模式，当前使用模拟快照验证页面承接链路。",
-    captureDetails: "当前展示开发桥接快照，后续切到真实 agentd UDS 通道。",
-    degradedReason: "当前为开发桥接模式，尚未切到真实桌面命令注入。",
+    permissionDetails: "当前处于开发桥接模式，使用模拟快照验证页面与状态流。",
+    captureDetails: "当前展示开发桥接快照，后续会切到真实 agentd UDS 通道。",
+    degradedReason: "当前仍是开发桥接模式，真实桌面命令注入尚未接入。",
     liveHeadline: "syncthing -> 10.0.0.25",
-    recentAlertTitle: "最近它有点红",
-    recentAlertSyncthing: "这货后台连太久了，建议盯一眼。",
-    recentAlertCode: "第一次连到 api.github.com，先记进小本本。",
-    alertBannerTitle: "后台同步还没收工",
+    recentAlertTitle: "最近提醒",
+    recentAlertSyncthing: "后台持续通信时间偏长，建议确认是否符合预期。",
+    recentAlertCode: "第一次连到 api.github.com，建议记录这次新外连。",
+    alertBannerTitle: "后台同步仍在继续",
   },
 } as const;
 
 export const GAL_METRIC_LABELS = {
   realtime: {
-    upload: "往外冲",
-    download: "往回灌",
-    state: "当前戏份",
-    activeConnections: "在场人数",
-    captureMode: "抓法",
-    widgetState: "挂件戏份",
-    syncState: "当前档位",
+    upload: "上行速率",
+    download: "下行速率",
+    state: "挂件状态",
+    activeConnections: "活跃连接",
+    captureMode: "采集模式",
+    widgetState: "值守状态",
+    syncState: "当前状态",
   },
   processes: {
-    processCount: "在场人数",
-    selectedPid: "锁定目标",
-    source: "情报源",
+    processCount: "进程数量",
+    selectedPid: "锁定进程",
+    source: "数据来源",
   },
   history: {
-    total: "旧账总数",
-    pageSize: "本页战果",
-    page: "翻到第几页",
-    selectedPid: "锁定目标",
+    total: "总记录数",
+    pageSize: "本页数量",
+    page: "当前页",
+    selectedPid: "锁定进程",
   },
   processDetail: {
-    pid: "锁定目标",
-    lastActive: "刚整过",
-    totalTraffic: "总消耗",
+    pid: "当前 PID",
+    lastActive: "最近活跃",
+    totalTraffic: "累计流量",
   },
   diagnostics: {
-    agent: "守护哥",
-    captureMode: "抓法",
-    database: "存档库",
+    agent: "守护进程",
+    captureMode: "观测能力",
+    database: "当前平台",
   },
 } as const;
 
 export const GAL_TABLE_HEADERS = {
   processes: {
-    process: "谁在整活",
-    traffic: "总消耗",
-    destinations: "去找几家",
-    lastActive: "刚整过",
-    alert: "红温没",
-    action: "怎么处置",
+    process: "进程",
+    traffic: "累计流量",
+    destinations: "目标数量",
+    lastActive: "最近活跃",
+    alert: "提醒状态",
+    action: "操作",
   },
   history: {
-    process: "谁在整活",
-    target: "去找谁",
-    direction: "怎么跑",
-    protocol: "哪路协议",
-    time: "啥时候整的",
-    traffic: "总消耗",
-    action: "怎么处置",
+    process: "进程",
+    target: "目标地址",
+    direction: "方向",
+    protocol: "协议",
+    time: "时间",
+    traffic: "累计流量",
+    action: "操作",
   },
 } as const;
 
 export const GAL_ACTION_COPY = {
   dashboardRefresh: {
-    idle: "再抓一轮",
-    busy: "重抓中...",
+    idle: "刷新状态",
+    busy: "刷新中...",
   },
   realtimeRefresh: {
-    loading: "抓现行中...",
-    busy: "重抓中...",
-    idle: "再抓一轮",
+    loading: "拉取快照中...",
+    busy: "刷新中...",
+    idle: "刷新快照",
   },
-  realtimeOpenWidget: "单开看猫",
+  realtimeOpenWidget: "单独打开挂件",
   processesRefresh: {
-    idle: "再点一轮",
-    busy: "点名中...",
+    idle: "刷新列表",
+    busy: "刷新中...",
   },
-  processInspect: "贴脸看",
+  processInspect: "查看详情",
   historyRefresh: {
-    idle: "再翻一轮",
-    busy: "翻账中...",
+    idle: "刷新记录",
+    busy: "刷新中...",
   },
-  historyApply: "开始翻账",
-  historyReset: "清空重开",
-  historyExportJson: "打包 JSON",
-  historyExportCsv: "打包 CSV",
-  historyPrev: "往前翻",
-  historyNext: "继续翻",
-  historyInspect: "贴脸看",
-  historyInspectMissing: "没法贴脸",
+  historyApply: "应用筛选",
+  historyReset: "恢复默认",
+  historyExportJson: "导出 JSON",
+  historyExportCsv: "导出 CSV",
+  historyPrev: "上一页",
+  historyNext: "下一页",
+  historyInspect: "查看详情",
+  historyInspectMissing: "暂无详情",
   processDetailRefresh: {
-    idle: "再审一轮",
-    busy: "拷打中...",
+    idle: "刷新详情",
+    busy: "刷新中...",
   },
   diagnosticsRefresh: {
-    idle: "再救一下",
-    busy: "抢救中...",
+    idle: "重新检测",
+    busy: "检测中...",
   },
   widget: {
     drag: "拖拽挂件",
-    refresh: "再抓一轮",
+    adjustCharacter: "拖动角色调整站位",
+    resizeCharacter: "滚轮调整角色大小",
+    refresh: "刷新快照",
     hoverLabel: "流量排行",
-    empty: "这会儿还没人整活。",
-    openDashboard: "回主场",
-    openDiagnostics: "进去抢救",
-    opening: "开门中...",
+    empty: "当前还没有活跃连接。",
+    openDashboard: "打开观察室",
+    openDiagnostics: "前往诊断",
+    opening: "打开中...",
+    resetPlacement: "恢复默认站位",
   },
 } as const;
 
 export const GAL_RUNTIME_COPY = {
-  bridgeMissingMessage: "桥还没来，先看回退档。",
-  liveSourceLabel: "真档在线",
-  fallbackSourceLabel: "回退档顶班",
-  connectingSourceLabel: "连线中",
-  dashboardInitialSyncLabel: "抓现行中",
-  processesInitialSyncLabel: "点名中",
-  historyInitialSyncLabel: "翻账中",
-  processDetailInitialSyncLabel: "拷打中",
-  processDetailDisabledSourceLabel: "还没锁人",
-  processDetailDisabledSyncLabel: "还没开审",
-  disconnectedSyncLabel: "线没接上",
-  fallbackSyncLabel: "已切回回退档",
-  disabledSyncLabel: "还没开局",
-  unknownError: "寄因不明",
+  bridgeMissingMessage: "桌面桥接暂时不可用，先用回退快照兜底。",
+  liveSourceLabel: "真实观测",
+  fallbackSourceLabel: "回退快照",
+  connectingSourceLabel: "连接中",
+  dashboardInitialSyncLabel: "同步中",
+  processesInitialSyncLabel: "同步中",
+  historyInitialSyncLabel: "同步中",
+  processDetailInitialSyncLabel: "同步中",
+  processDetailDisabledSourceLabel: "等待选择进程",
+  processDetailDisabledSyncLabel: "尚未进入详情",
+  disconnectedSyncLabel: "未接入真实链路",
+  fallbackSyncLabel: "已切到回退观测",
+  disabledSyncLabel: "当前未启用",
+  unknownError: "未知错误",
 } as const;
 
 export function getRuntimeModeLabel(mode: DashboardRuntimeMode) {
   switch (mode) {
     case "live":
-      return "真档在线";
+      return "真实观测";
     case "mock":
-      return "模拟档";
+      return "示意模式";
     case "fallback":
-      return "回退档";
+      return "回退观测";
     case "connecting":
-      return "连线中";
+      return "连接中";
     case "disabled":
-      return "还没开局";
+      return "未启用";
   }
 }
 
@@ -407,13 +435,13 @@ export function getRealtimeRuntimeLabel(mode: DashboardRuntimeMode, options?: {
   hasError?: boolean;
 }) {
   if (options?.isRefreshing) {
-    return "重抓中";
+    return "刷新中";
   }
   if (options?.isLoading) {
-    return "抓现行中";
+    return "同步中";
   }
   if (options?.hasError) {
-    return "桥寄了";
+    return "链路异常";
   }
   return getRuntimeModeLabel(mode);
 }
@@ -421,11 +449,11 @@ export function getRealtimeRuntimeLabel(mode: DashboardRuntimeMode, options?: {
 export function getCaptureModeLabel(mode: string) {
   switch (mode) {
     case "proc_fallback":
-      return "回退档";
+      return "回退采集";
     case "ebpf":
       return "eBPF";
     case "unknown":
-      return "谜之模式";
+      return "识别中";
     default:
       return mode;
   }
@@ -434,27 +462,27 @@ export function getCaptureModeLabel(mode: string) {
 export function getWidgetStateLabel(state: string) {
   switch (state.trim().toLowerCase()) {
     case "idle":
-      return "装乖";
+      return "安静值守";
     case "download":
     case "download_active":
-      return "下行暴走";
+      return "下行活跃";
     case "upload":
     case "upload_active":
-      return "上行暴走";
+      return "上行活跃";
     case "bidirectional":
     case "bidirectional_active":
-      return "双向开冲";
+      return "双向忙碌";
     case "alerting":
-      return "红温警报";
+      return "提醒触发";
     case "unknown":
-      return "看不懂";
+      return "识别中";
     default:
       return state;
   }
 }
 
 export function getAlertBadgeLabel(hasAlert: boolean) {
-  return hasAlert ? "红了" : "还行";
+  return hasAlert ? "需关注" : "稳定";
 }
 
 export function getAgentStatusLabel(status: string) {
@@ -464,13 +492,13 @@ export function getAgentStatusLabel(status: string) {
     case "online":
       return "在线";
     case "degraded":
-      return "半红温";
+      return "降级运行";
     case "offline":
     case "unreachable":
     case "disconnected":
-      return "掉线";
+      return "未连接";
     case "unknown":
-      return "看不懂";
+      return "识别中";
     default:
       return status;
   }
@@ -479,14 +507,14 @@ export function getAgentStatusLabel(status: string) {
 export function getDatabaseStatusLabel(status: string) {
   switch (status.trim().toLowerCase()) {
     case "healthy":
-      return "存档稳";
+      return "正常";
     case "degraded":
-      return "有点抖";
+      return "需关注";
     case "offline":
     case "unreachable":
-      return "掉线";
+      return "不可用";
     case "unknown":
-      return "看不懂";
+      return "识别中";
     default:
       return status;
   }
@@ -495,11 +523,11 @@ export function getDatabaseStatusLabel(status: string) {
 export function getConnectionStateLabel(state: string) {
   switch (state.trim().toLowerCase()) {
     case "established":
-      return "已接上";
+      return "已建立";
     case "observed":
-      return "路过一脚";
+      return "已观测";
     case "unknown":
-      return "看不懂";
+      return "识别中";
     default:
       return state;
   }

@@ -11,7 +11,7 @@ export interface AppLaunchContext {
   initialView: AppLaunchView;
 }
 
-const SUPPORTED_VIEWS = new Set<AppView>([
+const SUPPORTED_VIEWS = new Set<AppLaunchView>([
   "realtime",
   "processes",
   "history",
@@ -80,7 +80,7 @@ function normalizeWindowMode(value: string | null): AppWindowMode | null {
 }
 
 function normalizeView(value: string | null): AppLaunchContext["initialView"] | null {
-  if (value && SUPPORTED_VIEWS.has(value as AppView)) {
+  if (value && SUPPORTED_VIEWS.has(value as AppLaunchView)) {
     return value as AppLaunchView;
   }
   return null;
@@ -110,7 +110,7 @@ function inferWindowModeFromRoute(
   return null;
 }
 
-function inferViewFromRoute(pathname: string, hash: string): AppView | null {
+function inferViewFromRoute(pathname: string, hash: string): AppLaunchView | null {
   const route = `${pathname}${hash}`.toLowerCase();
   if (route.includes("/diagnostics") || route.includes("#diagnostics")) {
     return "diagnostics";

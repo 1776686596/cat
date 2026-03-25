@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+  type WheelEvent as ReactWheelEvent,
+} from "react";
 import atriAlertFront from "../../../../../Atri/亚托莉/Tachie/担心.png";
 import atriAngryFront from "../../../../../Atri/亚托莉/Tachie/生气.png";
 import atriCalmFront from "../../../../../Atri/亚托莉/Tachie/正常.png";
@@ -25,12 +32,20 @@ import {
   getWidgetStateLabel,
 } from "../../copy/galAbstract";
 import type { WidgetLayoutMode } from "../../hooks/useWidgetLayoutMode";
+import {
+  clampWidgetCharacterScale,
+  DEFAULT_WIDGET_CHARACTER_PLACEMENT,
+  type WidgetCharacterPlacement,
+} from "../../hooks/useWidgetCharacterPlacement";
 
 interface TrafficWidgetCardProps {
   snapshot: RealtimeSnapshotView;
   runtime: DashboardRuntimeView;
   mode?: "compact" | "panel";
   layoutMode?: WidgetLayoutMode;
+  characterPlacement?: WidgetCharacterPlacement;
+  editableCharacter?: boolean;
+  onCharacterPlacementChange?: (next: WidgetCharacterPlacement) => void;
   primaryActionLabel: string;
   onPrimaryAction: () => void;
   primaryDisabled?: boolean;
@@ -121,12 +136,16 @@ const ATRI_SPRITES = {
 
 const TRAFFIC_SPIKE_RATIO = 1.35;
 const TRAFFIC_SPIKE_BYTES = 384 * 1024;
+const CHARACTER_DRAG_DISTANCE_THRESHOLD = 6;
 
 export default function TrafficWidgetCard({
   snapshot,
   runtime,
   mode = "compact",
   layoutMode = "character-first",
+  characterPlacement = DEFAULT_WIDGET_CHARACTER_PLACEMENT,
+  editableCharacter = false,
+  onCharacterPlacementChange,
   primaryActionLabel,
   onPrimaryAction,
   primaryDisabled = false,
@@ -143,6 +162,20 @@ export default function TrafficWidgetCard({
   const activeMood = bubble?.mood ?? getAtriMood(tone, topConnection);
   const atriSprite = ATRI_SPRITES[activeMood][layoutMode];
   const isCompact = mode === "compact";
+  const dragStateRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    startPlacement: WidgetCharacterPlacement;
+  } | null>(null);
+  const suppressCharacterClickRef = useRef(false);
+  const [isCharacterDragging, setIsCharacterDragging] = useState(false);
+  const widgetStyle = {
+    "--widget-character-user-x": `${characterPlacement.offsetX}px`,
+    "--widget-character-user-y": `${characterPlacement.offsetY}px`,
+    "--widget-character-user-scale": characterPlacement.scale,
+    "--widget-overlay-user-opacity": characterPlacement.overlayOpacity,
+  } as CSSProperties;
 
   async function handleStartDragging() {
     const bridge = resolveDesktopBridge();
@@ -157,9 +190,83 @@ export default function TrafficWidgetCard({
     }
   }
 
+  function handleCharacterPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!editableCharacter || !onCharacterPlacementChange) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    dragStateRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startPlacement: characterPlacement,
+    };
+    suppressCharacterClickRef.current = false;
+    setIsCharacterDragging(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function handleCharacterPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!editableCharacter || !onCharacterPlacementChange) {
+      return;
+    }
+
+    const dragState = dragStateRef.current;
+    if (!dragState || dragState.pointerId !== event.pointerId) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    const offsetX = event.clientX - dragState.startX;
+    const offsetY = event.clientY - dragState.startY;
+    if (
+      Math.hypot(offsetX, offsetY) >= CHARACTER_DRAG_DISTANCE_THRESHOLD
+    ) {
+      suppressCharacterClickRef.current = true;
+    }
+    onCharacterPlacementChange({
+      ...dragState.startPlacement,
+      offsetX: dragState.startPlacement.offsetX + offsetX,
+      offsetY: dragState.startPlacement.offsetY + offsetY,
+    });
+  }
+
+  function handleCharacterPointerUp(event: ReactPointerEvent<HTMLDivElement>) {
+    const dragState = dragStateRef.current;
+    if (!dragState || dragState.pointerId !== event.pointerId) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    dragStateRef.current = null;
+    setIsCharacterDragging(false);
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  }
+
+  function handleCharacterWheel(event: ReactWheelEvent<HTMLDivElement>) {
+    if (!editableCharacter || !onCharacterPlacementChange) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    const delta = event.deltaY < 0 ? 0.04 : -0.04;
+    onCharacterPlacementChange({
+      ...characterPlacement,
+      scale: clampWidgetCharacterScale(characterPlacement.scale + delta),
+    });
+  }
+
   return (
     <section
       className={`traffic-widget traffic-widget--${mode} is-${tone} is-${layoutMode}`}
+      style={widgetStyle}
     >
       <div className="traffic-widget__shell">
         {isCompact ? (
@@ -209,7 +316,7 @@ export default function TrafficWidgetCard({
             <div className="traffic-widget__masthead-copy">
               <span className="traffic-widget__serial">
                 {layoutMode === "character-first"
-                  ? "Atri Scene"
+                  ? "Watch Scene"
                   : "Traffic Stage"}
               </span>
               <strong>{getSceneTitle(tone, topConnection)}</strong>
@@ -226,7 +333,38 @@ export default function TrafficWidgetCard({
             </div>
           ) : null}
 
-          <div className="traffic-widget__character">
+          <div
+            className={[
+              "traffic-widget__character",
+              editableCharacter ? "is-editable" : "",
+              isCharacterDragging ? "is-dragging" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            onClickCapture={(event) => {
+              if (!editableCharacter) {
+                return;
+              }
+              suppressCharacterClickRef.current = false;
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+            onPointerDown={handleCharacterPointerDown}
+            onPointerMove={handleCharacterPointerMove}
+            onPointerUp={handleCharacterPointerUp}
+            onPointerCancel={handleCharacterPointerUp}
+            onWheel={handleCharacterWheel}
+            aria-label={
+              editableCharacter
+                ? `${GAL_ACTION_COPY.widget.adjustCharacter}，${GAL_ACTION_COPY.widget.resizeCharacter}`
+                : undefined
+            }
+            title={
+              editableCharacter
+                ? `${GAL_ACTION_COPY.widget.adjustCharacter}，${GAL_ACTION_COPY.widget.resizeCharacter}`
+                : undefined
+            }
+          >
             <img src={atriSprite} alt="" aria-hidden="true" />
           </div>
 
@@ -358,8 +496,8 @@ function detectWidgetBubble(
   if (current.hasError && !previous.hasError) {
     return createBubble(
       "bridge-error",
-      "Atri 警报",
-      "桥接掉线了，先把链路救回来再继续看戏。",
+      "守望姬警报",
+      "桥接掉线了，先把链路接回来，再继续看实时动静。",
       "alert",
     );
   }
@@ -367,8 +505,8 @@ function detectWidgetBubble(
   if (current.captureMode === "proc_fallback" && previous.captureMode !== "proc_fallback") {
     return createBubble(
       "fallback-mode",
-      "Atri 小声说",
-      "现在是回退档，数字能看，但别全信。",
+      "守望姬提示",
+      "当前是回退观测，趋势能看，但别把细节当成满精度。",
       "curious",
     );
   }
@@ -376,7 +514,7 @@ function detectWidgetBubble(
   if (current.tone === "alerting" && previous.tone !== "alerting") {
     return createBubble(
       "alerting",
-      "Atri 警报",
+      "守望姬警报",
       "这波状态不像在演，最好点进去盯一眼。",
       "angry",
     );
@@ -398,8 +536,8 @@ function detectWidgetBubble(
   ) {
     return createBubble(
       `traffic-rise-${current.topSessionId}-${current.topTotalRateValue}`,
-      "Atri 盯梢中",
-      `${topConnection?.processName ?? "它"} 突然上头了，这波流量有点抢戏。`,
+      "守望姬盯梢中",
+      `${topConnection?.processName ?? "它"} 的流量突然抬头了，这一波值得优先看。`,
       "excited",
     );
   }
@@ -407,8 +545,8 @@ function detectWidgetBubble(
   if (!previous.topSessionId && current.topSessionId) {
     return createBubble(
       `opening-${current.topSessionId}`,
-      "Atri 出场",
-      `${topConnection?.processName ?? "第一名"} 已经站上 C 位，我替你盯着。`,
+      "守望姬出场",
+      `${topConnection?.processName ?? "第一名"} 已经站到榜首，我先替你盯着。`,
       "happy",
     );
   }
@@ -416,7 +554,7 @@ function detectWidgetBubble(
   if (previous.connectionCount > 0 && current.connectionCount === 0) {
     return createBubble(
       "sea-calm",
-      "Atri 旁白",
+      "守望姬旁白",
       "海面暂时平了，先让我装作若无其事。",
       "calm",
     );
@@ -425,7 +563,7 @@ function detectWidgetBubble(
   if (current.isRefreshing && !previous.isRefreshing) {
     return createBubble(
       "refreshing",
-      "Atri 倒数",
+      "守望姬倒数",
       "新一轮抓现行中，别让它们趁机溜了。",
       "focus",
     );
@@ -443,7 +581,7 @@ function buildAmbientBubble(
   if (runtime.errorMessage) {
     return createBubble(
       "ambient-error",
-      "Atri 警报",
+      "守望姬警报",
       "桥这会儿不通，先别急着相信眼前这点动静。",
       "alert",
     );
@@ -452,8 +590,8 @@ function buildAmbientBubble(
   if (snapshot.captureMode === "proc_fallback") {
     return createBubble(
       "ambient-fallback",
-      "Atri 备注",
-      "现在走的是回退档，先当这份情报是预告片。",
+      "守望姬备注",
+      "现在走的是回退观测，先把这份情报当作趋势预览。",
       "curious",
     );
   }
@@ -461,7 +599,7 @@ function buildAmbientBubble(
   if (!topConnection) {
     return createBubble(
       "ambient-idle",
-      "Atri 打盹",
+      "守望姬打盹",
       "今天的网路海面很安静，我先站着看看。",
       "sleep",
     );
@@ -470,7 +608,7 @@ function buildAmbientBubble(
   if (tone === "alerting") {
     return createBubble(
       "ambient-alerting",
-      "Atri 警报",
+      "守望姬警报",
       `${topConnection.processName} 这会儿最显眼，先盯它。`,
       "alert",
     );
@@ -478,7 +616,7 @@ function buildAmbientBubble(
 
   return createBubble(
     `ambient-${topConnection.sessionId}`,
-    "Atri 盯梢中",
+    "守望姬盯梢中",
     `${topConnection.processName} 现在在榜首，我已经把镜头推过去了。`,
     "focus",
   );

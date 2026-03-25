@@ -559,6 +559,34 @@ code {
   color: var(--botanical-fg);
 }
 
+.widget-preview-editor {
+  border-color: rgba(194, 123, 102, 0.18);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(246, 241, 235, 0.84)),
+    #ffffff;
+  box-shadow: var(--botanical-shadow-sm);
+}
+
+.widget-preview-editor__copy span,
+.widget-preview-editor__hint {
+  color: var(--botanical-fg-soft);
+}
+
+.widget-preview-editor__slider strong {
+  color: var(--botanical-fg);
+}
+
+.widget-preview-editor__reset {
+  border-color: rgba(140, 154, 132, 0.28);
+  background: rgba(255, 255, 255, 0.76);
+  color: var(--botanical-primary-deep);
+}
+
+.widget-preview-editor__reset:hover {
+  border-color: rgba(140, 154, 132, 0.4);
+  background: rgba(140, 154, 132, 0.12);
+}
+
 .traffic-widget--panel {
   justify-self: end;
   --widget-surface: #fffdf8;
@@ -569,6 +597,11 @@ code {
   --widget-chip: rgba(255, 255, 255, 0.76);
   --widget-shadow: 0 20px 40px -10px rgba(45, 58, 49, 0.12);
   --widget-pet-glow: rgba(194, 123, 102, 0.16);
+}
+
+.traffic-widget__character.is-editable::after {
+  border-color: rgba(140, 154, 132, 0.48);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.32), transparent 44%);
 }
 
 .traffic-widget--panel .traffic-widget__surface,
@@ -603,6 +636,67 @@ code {
   background:
     linear-gradient(90deg, rgba(220, 207, 194, 0.5), rgba(255, 255, 255, 0.84)),
     #ffffff;
+  color: var(--botanical-fg);
+}
+
+.page-note--soft,
+.support-summary__item,
+.signal-card,
+.setup-checklist__item {
+  border: 1px solid rgba(230, 226, 218, 0.95);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(242, 240, 235, 0.78)),
+    #ffffff;
+  box-shadow: var(--botanical-shadow-sm);
+}
+
+.support-summary__item span,
+.signal-card p,
+.setup-checklist__copy span {
+  color: var(--botanical-fg-soft);
+}
+
+.signal-card span {
+  color: var(--botanical-fg-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.signal-card strong,
+.support-summary__item strong,
+.setup-checklist__copy strong {
+  color: var(--botanical-fg);
+}
+
+.signal-card.is-warn {
+  border-color: rgba(194, 123, 102, 0.18);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(247, 238, 234, 0.82)),
+    #ffffff;
+}
+
+.setup-checklist__status {
+  border: 1px solid rgba(230, 226, 218, 0.95);
+  box-shadow: var(--botanical-shadow-sm);
+}
+
+.setup-checklist__status.is-ready {
+  border-color: rgba(140, 154, 132, 0.24);
+  background: rgba(140, 154, 132, 0.12);
+  color: var(--botanical-primary-deep);
+}
+
+.setup-checklist__status.is-attention {
+  border-color: rgba(194, 123, 102, 0.16);
+  background: rgba(194, 123, 102, 0.1);
+  color: var(--botanical-interactive);
+}
+
+.setup-checklist__status.is-planned {
+  border-color: rgba(220, 207, 194, 0.95);
+  background: rgba(220, 207, 194, 0.52);
   color: var(--botanical-fg);
 }
 

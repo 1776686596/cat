@@ -40,6 +40,7 @@ export default function App({
   let activePage = (
     <RealtimePage
       snapshot={dashboardData.realtime}
+      diagnostics={dashboardData.diagnostics}
       runtime={runtime}
       onRefresh={refresh}
     />
@@ -49,6 +50,7 @@ export default function App({
       activePage = (
         <RealtimePage
           snapshot={dashboardData.realtime}
+          diagnostics={dashboardData.diagnostics}
           runtime={runtime}
           onRefresh={refresh}
         />
@@ -104,20 +106,16 @@ export default function App({
             <strong>{PAGE_TITLES[activeView]}</strong>
           </div>
           <div className="sidebar-overview-card">
-            <span>{GAL_SHELL_COPY.cards.source}</span>
-            <strong>{runtime.sourceLabel}</strong>
+            <span>{GAL_SHELL_COPY.cards.platform}</span>
+            <strong>{dashboardData.diagnostics.platformLabel}</strong>
+          </div>
+          <div className="sidebar-overview-card">
+            <span>{GAL_SHELL_COPY.cards.capability}</span>
+            <strong>{dashboardData.diagnostics.capabilityLabel}</strong>
           </div>
           <div className="sidebar-overview-card">
             <span>{GAL_SHELL_COPY.cards.sync}</span>
             <strong>{runtime.lastUpdatedLabel}</strong>
-          </div>
-          <div className="sidebar-overview-card">
-            <span>{GAL_SHELL_COPY.cards.selectedPid}</span>
-            <strong>
-              {selectedProcessId === null
-                ? GAL_SHELL_COPY.selectedPidEmpty
-                : `PID ${selectedProcessId}`}
-            </strong>
           </div>
         </div>
 

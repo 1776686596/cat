@@ -24,6 +24,17 @@ export interface RealtimeSnapshotView {
   activeConnections: RealtimeConnectionItem[];
 }
 
+export type DesktopPlatformId = "linux" | "windows" | "macos" | "unknown";
+
+export type SetupChecklistStatus = "ready" | "attention" | "planned";
+
+export interface SetupChecklistItemView {
+  id: string;
+  title: string;
+  detail: string;
+  status: SetupChecklistStatus;
+}
+
 export interface DiagnosticsSnapshotView {
   cycleLabel: string;
   agentStatus: string;
@@ -32,6 +43,15 @@ export interface DiagnosticsSnapshotView {
   degradedReason: string | null;
   permissionSummary: string;
   socketPath: string;
+  databasePath: string;
+  platform: DesktopPlatformId;
+  platformLabel: string;
+  supportLabel: string;
+  platformSummary: string;
+  capabilityLabel: string;
+  capabilitySummary: string;
+  recommendedAction: string;
+  setupChecklist: SetupChecklistItemView[];
 }
 
 export interface DashboardData {

@@ -125,9 +125,9 @@ function formatHistoryTime(
   endedAt?: number | null,
 ): string {
   if (endedAt) {
-    return `${formatRelativeTime(endedAt)}收工`;
+    return `${formatRelativeTime(endedAt)}结束`;
   }
-  return `${formatRelativeTime(startedAt)}还在整活`;
+  return `${formatRelativeTime(startedAt)}仍在持续`;
 }
 
 function buildFallbackSessionId(item: AgentHistoryItemPayload): string {

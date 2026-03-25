@@ -1,6 +1,7 @@
 import { buildAppUrl } from "../app/windowMode";
 import MetricChip from "../components/common/MetricChip";
 import SectionCard from "../components/common/SectionCard";
+import SetupChecklist from "../components/common/SetupChecklist";
 import TrafficWidgetCard from "../components/widget/TrafficWidgetCard";
 import {
   GAL_ACTION_COPY,
@@ -11,27 +12,57 @@ import {
   getRealtimeRuntimeLabel,
   getWidgetStateLabel,
 } from "../copy/galAbstract";
+import {
+  WIDGET_CHARACTER_SCALE_MAX,
+  WIDGET_CHARACTER_SCALE_MIN,
+  WIDGET_CHARACTER_SCALE_STEP,
+  WIDGET_OVERLAY_OPACITY_MAX,
+  WIDGET_OVERLAY_OPACITY_MIN,
+  WIDGET_OVERLAY_OPACITY_STEP,
+  useWidgetCharacterPlacement,
+} from "../hooks/useWidgetCharacterPlacement";
 import { useWidgetLayoutMode } from "../hooks/useWidgetLayoutMode";
 import type {
   DashboardRuntimeView,
+  DiagnosticsSnapshotView,
   RealtimeSnapshotView,
 } from "../types/appData";
 
 interface RealtimePageProps {
   snapshot: RealtimeSnapshotView;
+  diagnostics: DiagnosticsSnapshotView;
   runtime: DashboardRuntimeView;
   onRefresh: () => Promise<void>;
 }
 
+interface RealtimeFocusSignal {
+  id: string;
+  eyebrow: string;
+  title: string;
+  detail: string;
+  tone: "normal" | "warn";
+}
+
 export default function RealtimePage({
   snapshot,
+  diagnostics,
   runtime,
   onRefresh,
 }: RealtimePageProps) {
   const notice = getRealtimeNotice(snapshot, runtime);
   const { layoutMode, setLayoutMode } = useWidgetLayoutMode();
+  const {
+    placement,
+    setPlacement,
+    updatePlacement,
+    resetPlacement,
+  } = useWidgetCharacterPlacement(layoutMode);
   const realtimeMetricLabels = GAL_METRIC_LABELS.realtime;
   const realtimePageCopy = GAL_PAGE_COPY.realtime;
+  const setupNeedsAttention = diagnostics.setupChecklist.some(
+    (item) => item.status === "attention",
+  );
+  const focusSignals = buildRealtimeFocusSignals(snapshot, diagnostics, runtime);
   const spotlightCards = [
     {
       label: realtimeMetricLabels.activeConnections,
@@ -185,6 +216,61 @@ export default function RealtimePage({
                 </div>
               </div>
 
+              <div className="widget-preview-editor">
+                <div className="widget-preview-editor__copy">
+                  <strong>{realtimePageCopy.widgetEditorTitle}</strong>
+                  <span>{realtimePageCopy.widgetEditorSummary}</span>
+                </div>
+
+                <div className="widget-preview-editor__controls">
+                  <label className="widget-preview-editor__slider">
+                    <span>{realtimePageCopy.widgetEditorScaleLabel}</span>
+                    <input
+                      type="range"
+                      min={WIDGET_CHARACTER_SCALE_MIN}
+                      max={WIDGET_CHARACTER_SCALE_MAX}
+                      step={WIDGET_CHARACTER_SCALE_STEP}
+                      value={placement.scale}
+                      onChange={(event) => {
+                        updatePlacement({
+                          scale: Number(event.currentTarget.value),
+                        });
+                      }}
+                    />
+                    <strong>{Math.round(placement.scale * 100)}%</strong>
+                  </label>
+
+                  <label className="widget-preview-editor__slider">
+                    <span>{realtimePageCopy.widgetEditorOverlayOpacityLabel}</span>
+                    <input
+                      type="range"
+                      min={WIDGET_OVERLAY_OPACITY_MIN}
+                      max={WIDGET_OVERLAY_OPACITY_MAX}
+                      step={WIDGET_OVERLAY_OPACITY_STEP}
+                      value={placement.overlayOpacity}
+                      onChange={(event) => {
+                        updatePlacement({
+                          overlayOpacity: Number(event.currentTarget.value),
+                        });
+                      }}
+                    />
+                    <strong>{Math.round(placement.overlayOpacity * 100)}%</strong>
+                  </label>
+
+                  <button
+                    className="widget-preview-editor__reset"
+                    type="button"
+                    onClick={resetPlacement}
+                  >
+                    {realtimePageCopy.widgetEditorResetLabel}
+                  </button>
+                </div>
+
+                <p className="widget-preview-editor__hint">
+                  {realtimePageCopy.widgetEditorHint}
+                </p>
+              </div>
+
               <div className="widget-preview-point">
                 <strong>{realtimePageCopy.widgetPoints.idleTitle}</strong>
                 <span>{realtimePageCopy.widgetPoints.idleCopy}</span>
@@ -208,12 +294,61 @@ export default function RealtimePage({
             runtime={runtime}
             mode="panel"
             layoutMode={layoutMode}
+            characterPlacement={placement}
+            editableCharacter
+            onCharacterPlacementChange={setPlacement}
             primaryActionLabel={GAL_ACTION_COPY.realtimeOpenWidget}
             onPrimaryAction={openWidgetPreview}
             onRefresh={onRefresh}
             refreshDisabled={runtime.isRefreshing}
           />
         </section>
+
+        <div className="page-grid">
+          <SectionCard
+            eyebrow={realtimePageCopy.setup.eyebrow}
+            title={realtimePageCopy.setup.title}
+            summary={realtimePageCopy.setup.summary}
+            badge={diagnostics.supportLabel}
+            badgeTone={setupNeedsAttention ? "warn" : "normal"}
+          >
+            <div className="support-summary">
+              <div className="support-summary__item">
+                <strong>{diagnostics.platformLabel}</strong>
+                <span>{diagnostics.platformSummary}</span>
+              </div>
+              <div className="support-summary__item">
+                <strong>{diagnostics.capabilityLabel}</strong>
+                <span>{diagnostics.capabilitySummary}</span>
+              </div>
+            </div>
+
+            <div className="page-note page-note--soft">
+              {diagnostics.recommendedAction}
+            </div>
+
+            <SetupChecklist items={diagnostics.setupChecklist} />
+          </SectionCard>
+
+          <SectionCard
+            eyebrow={realtimePageCopy.focus.eyebrow}
+            title={realtimePageCopy.focus.title}
+            summary={realtimePageCopy.focus.summary}
+          >
+            <div className="signal-grid">
+              {focusSignals.map((item) => (
+                <article
+                  className={`signal-card ${item.tone === "warn" ? "is-warn" : ""}`.trim()}
+                  key={item.id}
+                >
+                  <span>{item.eyebrow}</span>
+                  <strong>{item.title}</strong>
+                  <p>{item.detail}</p>
+                </article>
+              ))}
+            </div>
+          </SectionCard>
+        </div>
 
         <SectionCard
           eyebrow={realtimePageCopy.hotspot.eyebrow}
@@ -314,4 +449,60 @@ function isZeroThroughputSnapshot(snapshot: RealtimeSnapshotView) {
     snapshot.downloadRate === "0 B/s" &&
     snapshot.activeConnections.every((item) => item.totalRate === "0 B/s")
   );
+}
+
+function buildRealtimeFocusSignals(
+  snapshot: RealtimeSnapshotView,
+  diagnostics: DiagnosticsSnapshotView,
+  runtime: DashboardRuntimeView,
+): RealtimeFocusSignal[] {
+  const topConnection = snapshot.activeConnections[0];
+  const setupNeedsAttention = diagnostics.setupChecklist.some(
+    (item) => item.status === "attention",
+  );
+
+  const trafficSignal = runtime.errorMessage
+    ? {
+        id: "runtime-error",
+        eyebrow: "链路状态",
+        title: "先把实时链路接回来",
+        detail: runtime.errorMessage,
+        tone: "warn" as const,
+      }
+    : topConnection
+      ? {
+          id: topConnection.sessionId,
+          eyebrow: "当前榜首",
+          title: `${topConnection.processName} 正在最前排`,
+          detail: `${topConnection.target} · ${topConnection.totalRate} · ${topConnection.lastSeenLabel}`,
+          tone: "normal" as const,
+        }
+      : {
+          id: "no-traffic",
+          eyebrow: "当前榜首",
+          title: "桌面暂时很安静",
+          detail: "现在没有活跃连接，挂件会继续在后台值守。",
+          tone: "normal" as const,
+        };
+
+  return [
+    trafficSignal,
+    {
+      id: "capability",
+      eyebrow: "观测能力",
+      title: diagnostics.capabilityLabel,
+      detail: diagnostics.capabilitySummary,
+      tone: setupNeedsAttention ? "warn" : "normal",
+    },
+    {
+      id: "next-action",
+      eyebrow: diagnostics.supportLabel,
+      title: "下一步最值得补这里",
+      detail: diagnostics.recommendedAction,
+      tone:
+        runtime.isFallback || snapshot.captureMode === "proc_fallback"
+          ? "warn"
+          : "normal",
+    },
+  ];
 }

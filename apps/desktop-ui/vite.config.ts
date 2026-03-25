@@ -1,6 +1,7 @@
 import { access } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 import { execFile } from "node:child_process";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
@@ -26,6 +27,10 @@ const ENV_REQUEST_TIMEOUT_MILLIS = "TRAFFIC_CAT_AGENT_TIMEOUT_MILLIS";
 
 let shellBinaryPromise: Promise<string> | null = null;
 
+type DevBridgeRequest = IncomingMessage & AsyncIterable<string | Uint8Array>;
+type DevBridgeResponse = ServerResponse<IncomingMessage>;
+type DevBridgeNext = (err?: unknown) => void;
+
 export default defineConfig(({ mode }) => {
   const loadedEnv = loadEnv(mode, APP_ROOT, "");
   const shellExecEnv = buildShellExecEnv(loadedEnv);
@@ -39,7 +44,11 @@ function trafficCatDevBridgePlugin(shellExecEnv: NodeJS.ProcessEnv): Plugin {
   return {
     name: "traffic-cat-dev-bridge",
     configureServer(server) {
-      server.middlewares.use(async (req, res, next) => {
+      server.middlewares.use(async (
+        req: DevBridgeRequest,
+        res: DevBridgeResponse,
+        next: DevBridgeNext,
+      ) => {
         if (req.url !== DEV_BRIDGE_ROUTE || req.method !== "POST") {
           next();
           return;
@@ -110,11 +119,7 @@ async function ensureDesktopUiShellInner() {
 }
 
 async function readRequestBody(
-  req: Parameters<NonNullable<Plugin["configureServer"]>>[0]["middlewares"]["use"] extends (
-    ...args: infer T
-  ) => unknown
-    ? T[0]
-    : never,
+  req: DevBridgeRequest,
 ) {
   const chunks: Uint8Array[] = [];
   for await (const chunk of req) {
@@ -214,12 +219,11 @@ function readDirection(payload: Record<string, unknown>) {
   return undefined;
 }
 
-function writeJson(res: Parameters<NonNullable<Plugin["configureServer"]>>[0]["middlewares"]["use"] extends (
-  ...args: infer T
-) => unknown
-  ? T[1]
-  : never,
-statusCode: number, body: unknown) {
+function writeJson(
+  res: DevBridgeResponse,
+  statusCode: number,
+  body: unknown,
+) {
   const encoded = JSON.stringify(body);
   res.statusCode = statusCode;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
