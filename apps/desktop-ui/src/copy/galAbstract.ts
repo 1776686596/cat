@@ -255,6 +255,64 @@ export const GAL_NOTICE_COPY = {
   },
 } as const;
 
+export const GAL_WIDGET_SCENE_COPY = {
+  idle: {
+    stateLabel: "安静值守",
+    reasonTitle: "现在没什么值得紧张的",
+    lines: [
+      "现在很安静呢。",
+      "没有奇怪的动静。",
+      "我先替你看着。",
+      "今天暂时风平浪静。",
+      "嗯，现在不用紧张。",
+    ],
+  },
+  watching: {
+    stateLabel: "正在盯梢",
+    reasonTitle: "有点动静，我先看一眼",
+    lines: [
+      "有点动静，我看一眼。",
+      "这个连接还在继续。",
+      "先记下来，不急着下结论。",
+      "嗯……它还在悄悄活动。",
+      "现在有一点小动静。",
+    ],
+  },
+  busy_download: {
+    stateLabel: "下行热闹",
+    reasonTitle: "这边一下子热闹起来了",
+    lines: [
+      "它正在拼命往回搬东西。",
+      "这个目标今天很活跃哦。",
+      "有人在往这边塞很多东西。",
+      "这一条连接冲得很快。",
+      "哇，这边一下子热闹起来了。",
+    ],
+  },
+  busy_upload: {
+    stateLabel: "上行活跃",
+    reasonTitle: "它现在对外说得有点多",
+    lines: [
+      "等一下，它在往外发很多东西。",
+      "这次是主动往外送呢。",
+      "我先帮你盯紧这一条。",
+      "这一波更像是在往外传。",
+      "它现在对外说得有点多。",
+    ],
+  },
+  alert: {
+    stateLabel: "建议注意",
+    reasonTitle: "这条连接值得看一眼",
+    lines: [
+      "这个家伙以前没见过。",
+      "它已经偷偷连了很久了。",
+      "这个动静不太像平时那样。",
+      "等一下，这条我建议你看看。",
+      "这次有点可疑，我先叫你一声。",
+    ],
+  },
+} as const;
+
 export const GAL_EPISODE_SCENES = {
   dashboardRealtimeLive: "真实值守",
   dashboardRealtimeFallback: "回退值守",
