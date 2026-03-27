@@ -4,7 +4,7 @@ import type {
   RealtimeConnectionItem,
   RealtimeSnapshotView,
 } from "../types/appData";
-import { GAL_NOTICE_COPY } from "../copy/galAbstract";
+import { GAL_NOTICE_COPY, GAL_WIDGET_SCENE_COPY } from "../copy/galAbstract";
 import { resolveWidgetScene } from "./widgetScene";
 
 function createConnection(
@@ -138,6 +138,8 @@ describe("resolveWidgetScene", () => {
     expect(scene.sceneId).toBe("alert");
     expect(scene.reasonDetail).toContain("agentd 未连接");
     expect(scene.reasonDetail).toBe("agentd 未连接");
+    expect(scene.reasonTitle).not.toBe(GAL_WIDGET_SCENE_COPY.alert.reasonTitle);
+    expect(GAL_WIDGET_SCENE_COPY.alert.lines).not.toContain(scene.line);
   });
 
   it("同一 sessionId 下台词保持稳定，不受周期或更新时间影响", () => {
@@ -190,6 +192,8 @@ describe("resolveWidgetScene", () => {
       "当前没有明显活跃连接，挂件会继续在后台值守。",
     );
     expect(scene.overlayLead).not.toBe("这会儿还没人抢镜。");
+    expect(scene.reasonTitle).not.toBe(GAL_WIDGET_SCENE_COPY.alert.reasonTitle);
+    expect(GAL_WIDGET_SCENE_COPY.alert.lines).not.toContain(scene.line);
   });
 
   it("proc_fallback 模式下 guidance 复用 fallbackGuidance", () => {

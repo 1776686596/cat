@@ -8,6 +8,16 @@ import type {
 const RATE_DOMINANCE_RATIO = 1.35;
 const ACTIVE_RATE_THRESHOLD = 384 * 1024;
 const HIGH_ACTIVITY_RATE_THRESHOLD = 8 * 1024 * 1024;
+const ALERT_RUNTIME_COPY = {
+  reasonTitle: "当前链路需要注意",
+  lines: [
+    "链路状态有异常，我先提醒你。",
+    "现在不是连接热点的问题，先检查链路。",
+    "这一轮是异常提醒，不是单条连接告警。",
+    "当前值守链路有波动，建议先看诊断。",
+    "我先叫你一声，这次更像链路异常。",
+  ],
+} as const;
 
 export type WidgetSceneId =
   | "idle"
@@ -58,25 +68,44 @@ export function resolveWidgetScene(
   const topConnection = getTopConnection(snapshot.activeConnections);
   const sceneId = resolveSceneId(snapshot, runtime, normalizedState);
   const sceneCopy = GAL_WIDGET_SCENE_COPY[sceneId];
+  const isConnectionAlert = isConnectionDrivenAlert(sceneId, runtime, topConnection);
 
   return {
     sceneId,
     mood: pickSceneMood(sceneId, topConnection),
     stateLabel: sceneCopy.stateLabel,
     title: buildSceneTitle(sceneId, topConnection),
-    line: pickSceneLine(sceneId, topConnection),
+    line: pickSceneLine(sceneId, topConnection, isConnectionAlert),
     overlayLead: buildOverlayLead(
       sceneId,
       topConnection,
       snapshot.activeConnections.length,
     ),
     guidance: buildGuidance(sceneId, snapshot, runtime),
-    reasonTitle: sceneCopy.reasonTitle,
+    reasonTitle: buildReasonTitle(sceneId, isConnectionAlert),
     reasonDetail: buildReasonDetail(sceneId, snapshot, runtime, topConnection),
     focusProcessName: topConnection?.processName ?? null,
     focusTarget: topConnection?.target ?? null,
     focusRateLabel: topConnection?.totalRate ?? null,
   };
+}
+
+function isConnectionDrivenAlert(
+  sceneId: WidgetSceneId,
+  runtime: DashboardRuntimeView,
+  topConnection: RealtimeConnectionItem | null,
+): boolean {
+  return sceneId === "alert" && !runtime.errorMessage && topConnection !== null;
+}
+
+function buildReasonTitle(
+  sceneId: WidgetSceneId,
+  isConnectionAlert: boolean,
+): string {
+  if (sceneId === "alert" && !isConnectionAlert) {
+    return ALERT_RUNTIME_COPY.reasonTitle;
+  }
+  return GAL_WIDGET_SCENE_COPY[sceneId].reasonTitle;
 }
 
 function resolveSceneId(
@@ -249,8 +278,12 @@ function buildGuidance(
 function pickSceneLine(
   sceneId: WidgetSceneId,
   topConnection: RealtimeConnectionItem | null,
+  isConnectionAlert: boolean,
 ): string {
-  const lines = GAL_WIDGET_SCENE_COPY[sceneId].lines;
+  const lines =
+    sceneId === "alert" && !isConnectionAlert
+      ? ALERT_RUNTIME_COPY.lines
+      : GAL_WIDGET_SCENE_COPY[sceneId].lines;
   const index = stableIndex(topConnection?.sessionId ?? sceneId, lines.length);
   return lines[index];
 }
