@@ -320,17 +320,16 @@ export function resolveWidgetScene(
   const totalUpload = sumRate(snapshot.activeConnections, "uploadRateValue");
   const totalDownload = sumRate(snapshot.activeConnections, "downloadRateValue");
   const sceneId = deriveSceneId(snapshot, runtime, totalUpload, totalDownload);
-  const sceneCopy = GAL_WIDGET_SCENE_COPY[sceneId];
 
   return {
     sceneId,
     mood: pickSceneMood(sceneId, topConnection),
-    stateLabel: sceneCopy.stateLabel,
-    title: buildSceneTitle(sceneId, topConnection),
-    line: pickSceneLine(sceneId, topConnection),
+    stateLabel: GAL_WIDGET_SCENE_COPY[sceneId].stateLabel,
+    title: buildSceneTitle(sceneId, runtime, topConnection),
+    line: pickSceneLine(sceneId, runtime, topConnection),
     overlayLead: buildOverlayLead(sceneId, snapshot.activeConnections.length, topConnection),
     guidance: buildGuidance(sceneId, snapshot, runtime),
-    reasonTitle: sceneCopy.reasonTitle,
+    reasonTitle: buildReasonTitle(sceneId, runtime, topConnection),
     reasonDetail: buildReasonDetail(sceneId, snapshot, runtime, topConnection),
     focusProcessName: topConnection?.processName ?? null,
     focusTarget: topConnection?.target ?? null,
@@ -391,8 +390,13 @@ function pickSceneMood(
 
 function buildSceneTitle(
   sceneId: WidgetSceneId,
+  runtime: DashboardRuntimeView,
   topConnection: RealtimeConnectionItem | undefined,
 ) {
+  if (sceneId === "alert" && (runtime.errorMessage || !topConnection)) {
+    return "当前链路需要注意";
+  }
+
   if (!topConnection) {
     return sceneId === "idle" ? "海面平静" : "正在值守";
   }
@@ -411,6 +415,18 @@ function buildSceneTitle(
   }
 }
 
+function buildReasonTitle(
+  sceneId: WidgetSceneId,
+  runtime: DashboardRuntimeView,
+  topConnection: RealtimeConnectionItem | undefined,
+) {
+  if (sceneId === "alert" && (runtime.errorMessage || !topConnection)) {
+    return "当前链路需要注意";
+  }
+
+  return GAL_WIDGET_SCENE_COPY[sceneId].reasonTitle;
+}
+
 function buildReasonDetail(
   sceneId: WidgetSceneId,
   snapshot: RealtimeSnapshotView,
@@ -419,6 +435,10 @@ function buildReasonDetail(
 ) {
   if (runtime.errorMessage) {
     return runtime.errorMessage;
+  }
+
+  if (sceneId === "alert" && !topConnection) {
+    return "当前触发了提醒状态，但还没有榜首连接可展示。";
   }
 
   if (!topConnection) {
@@ -446,6 +466,10 @@ function buildOverlayLead(
   connectionCount: number,
   topConnection: RealtimeConnectionItem | undefined,
 ) {
+  if (sceneId === "alert" && (!topConnection || connectionCount === 0)) {
+    return "当前处于提醒状态，建议立即打开主界面确认。";
+  }
+
   if (!topConnection || connectionCount === 0) {
     return "这会儿还没人抢镜。";
   }
@@ -493,8 +517,13 @@ function buildGuidance(
 
 function pickSceneLine(
   sceneId: WidgetSceneId,
+  runtime: DashboardRuntimeView,
   topConnection: RealtimeConnectionItem | undefined,
 ) {
+  if (sceneId === "alert" && (runtime.errorMessage || !topConnection)) {
+    return "我先提醒你看一眼。";
+  }
+
   const lines = GAL_WIDGET_SCENE_COPY[sceneId].lines;
   const seed = topConnection?.sessionId ?? sceneId;
   return lines[stableIndex(seed, lines.length)];
