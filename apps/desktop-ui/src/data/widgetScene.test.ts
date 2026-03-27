@@ -4,6 +4,7 @@ import type {
   RealtimeConnectionItem,
   RealtimeSnapshotView,
 } from "../types/appData";
+import { GAL_NOTICE_COPY } from "../copy/galAbstract";
 import { resolveWidgetScene } from "./widgetScene";
 
 function createConnection(
@@ -172,5 +173,34 @@ describe("resolveWidgetScene", () => {
     expect(sceneA.sceneId).toBe("watching");
     expect(sceneB.sceneId).toBe("watching");
     expect(sceneA.line).toBe(sceneB.line);
+  });
+
+  it("widgetState=alerting 且无连接时保持 alert 语义，不退回中性文案", () => {
+    const scene = resolveWidgetScene(
+      createSnapshot({
+        widgetState: "alerting",
+        activeConnections: [],
+      }),
+      createRuntime(),
+    );
+
+    expect(scene.sceneId).toBe("alert");
+    expect(scene.title).not.toBe("正在值守");
+    expect(scene.reasonDetail).not.toContain(
+      "当前没有明显活跃连接，挂件会继续在后台值守。",
+    );
+    expect(scene.overlayLead).not.toBe("这会儿还没人抢镜。");
+  });
+
+  it("proc_fallback 模式下 guidance 复用 fallbackGuidance", () => {
+    const scene = resolveWidgetScene(
+      createSnapshot({
+        captureMode: "proc_fallback",
+        activeConnections: [createConnection()],
+      }),
+      createRuntime(),
+    );
+
+    expect(scene.guidance).toBe(GAL_NOTICE_COPY.widget.fallbackGuidance);
   });
 });

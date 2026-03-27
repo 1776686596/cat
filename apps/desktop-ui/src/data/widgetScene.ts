@@ -138,6 +138,9 @@ function buildSceneTitle(
   topConnection: RealtimeConnectionItem | null,
 ): string {
   if (!topConnection) {
+    if (sceneId === "alert") {
+      return "这条连接值得看一眼";
+    }
     return sceneId === "idle" ? "海面平静" : "正在值守";
   }
 
@@ -163,6 +166,10 @@ function buildReasonDetail(
 ): string {
   if (runtime.errorMessage) {
     return runtime.errorMessage;
+  }
+
+  if (sceneId === "alert" && !topConnection) {
+    return "当前触发了提醒状态，但还没有榜首连接可展示。";
   }
 
   if (!topConnection) {
@@ -192,6 +199,9 @@ function buildOverlayLead(
   connectionCount: number,
 ): string {
   if (!topConnection || connectionCount === 0) {
+    if (sceneId === "alert") {
+      return "当前处于提醒状态，建议立即打开主界面确认。";
+    }
     return "这会儿还没人抢镜。";
   }
 
