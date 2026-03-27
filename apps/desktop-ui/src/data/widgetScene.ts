@@ -1,4 +1,8 @@
-import { GAL_NOTICE_COPY, GAL_WIDGET_SCENE_COPY } from "../copy/galAbstract";
+import {
+  GAL_NOTICE_COPY,
+  GAL_WIDGET_ALERT_RUNTIME_COPY,
+  GAL_WIDGET_SCENE_COPY,
+} from "../copy/galAbstract";
 import type {
   DashboardRuntimeView,
   RealtimeConnectionItem,
@@ -8,16 +12,6 @@ import type {
 const RATE_DOMINANCE_RATIO = 1.35;
 const ACTIVE_RATE_THRESHOLD = 384 * 1024;
 const HIGH_ACTIVITY_RATE_THRESHOLD = 8 * 1024 * 1024;
-const ALERT_RUNTIME_COPY = {
-  reasonTitle: "当前链路需要注意",
-  lines: [
-    "链路状态有异常，我先提醒你。",
-    "现在不是连接热点的问题，先检查链路。",
-    "这一轮是异常提醒，不是单条连接告警。",
-    "当前值守链路有波动，建议先看诊断。",
-    "我先叫你一声，这次更像链路异常。",
-  ],
-} as const;
 
 export type WidgetSceneId =
   | "idle"
@@ -74,7 +68,7 @@ export function resolveWidgetScene(
     sceneId,
     mood: pickSceneMood(sceneId, topConnection),
     stateLabel: sceneCopy.stateLabel,
-    title: buildSceneTitle(sceneId, topConnection),
+    title: buildSceneTitle(sceneId, topConnection, isConnectionAlert),
     line: pickSceneLine(sceneId, topConnection, isConnectionAlert),
     overlayLead: buildOverlayLead(
       sceneId,
@@ -103,7 +97,7 @@ function buildReasonTitle(
   isConnectionAlert: boolean,
 ): string {
   if (sceneId === "alert" && !isConnectionAlert) {
-    return ALERT_RUNTIME_COPY.reasonTitle;
+    return GAL_WIDGET_ALERT_RUNTIME_COPY.reasonTitle;
   }
   return GAL_WIDGET_SCENE_COPY[sceneId].reasonTitle;
 }
@@ -165,11 +159,13 @@ function pickSceneMood(
 function buildSceneTitle(
   sceneId: WidgetSceneId,
   topConnection: RealtimeConnectionItem | null,
+  isConnectionAlert: boolean,
 ): string {
+  if (sceneId === "alert" && !isConnectionAlert) {
+    return GAL_WIDGET_ALERT_RUNTIME_COPY.title;
+  }
+
   if (!topConnection) {
-    if (sceneId === "alert") {
-      return "这条连接值得看一眼";
-    }
     return sceneId === "idle" ? "海面平静" : "正在值守";
   }
 
@@ -282,7 +278,7 @@ function pickSceneLine(
 ): string {
   const lines =
     sceneId === "alert" && !isConnectionAlert
-      ? ALERT_RUNTIME_COPY.lines
+      ? GAL_WIDGET_ALERT_RUNTIME_COPY.lines
       : GAL_WIDGET_SCENE_COPY[sceneId].lines;
   const index = stableIndex(topConnection?.sessionId ?? sceneId, lines.length);
   return lines[index];

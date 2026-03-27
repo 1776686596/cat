@@ -313,6 +313,18 @@ export const GAL_WIDGET_SCENE_COPY = {
   },
 } as const;
 
+export const GAL_WIDGET_ALERT_RUNTIME_COPY = {
+  title: "当前链路需要注意",
+  reasonTitle: "当前链路需要注意",
+  lines: [
+    "链路状态有异常，我先提醒你。",
+    "现在不是连接热点的问题，先检查链路。",
+    "这一轮是异常提醒，不是单条连接告警。",
+    "当前值守链路有波动，建议先看诊断。",
+    "我先叫你一声，这次更像链路异常。",
+  ],
+} as const;
+
 export const GAL_EPISODE_SCENES = {
   dashboardRealtimeLive: "真实值守",
   dashboardRealtimeFallback: "回退值守",
