@@ -81,6 +81,9 @@ describe("resolveWidgetScene", () => {
 
     expect(scene.sceneId).toBe("watching");
     expect(scene.reasonDetail).toContain("firefox");
+    expect(scene.title).toBe("firefox 引起注意");
+    expect(scene.reasonDetail).toBe("firefox 仍在连接 cdn.example.net:443。");
+    expect(scene.overlayLead).toBe("1 条连接里，firefox 最值得先看。");
   });
 
   it("下载主导时返回 busy_download", () => {
@@ -133,5 +136,41 @@ describe("resolveWidgetScene", () => {
 
     expect(scene.sceneId).toBe("alert");
     expect(scene.reasonDetail).toContain("agentd 未连接");
+    expect(scene.reasonDetail).toBe("agentd 未连接");
+  });
+
+  it("同一 sessionId 下台词保持稳定，不受周期或更新时间影响", () => {
+    const connection = createConnection({
+      sessionId: "stable-session-id",
+      processName: "syncthing",
+      target: "10.0.0.25:22000",
+      uploadRateValue: 128 * 1024,
+      downloadRateValue: 128 * 1024,
+      totalRateValue: 256 * 1024,
+    });
+
+    const sceneA = resolveWidgetScene(
+      createSnapshot({
+        cycleLabel: "第 1 回合",
+        activeConnections: [connection],
+      }),
+      createRuntime({
+        lastUpdatedLabel: "刚刚",
+      }),
+    );
+
+    const sceneB = resolveWidgetScene(
+      createSnapshot({
+        cycleLabel: "第 9 回合",
+        activeConnections: [connection],
+      }),
+      createRuntime({
+        lastUpdatedLabel: "2 分钟前",
+      }),
+    );
+
+    expect(sceneA.sceneId).toBe("watching");
+    expect(sceneB.sceneId).toBe("watching");
+    expect(sceneA.line).toBe(sceneB.line);
   });
 });

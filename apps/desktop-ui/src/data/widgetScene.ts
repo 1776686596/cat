@@ -64,11 +64,15 @@ export function resolveWidgetScene(
     mood: pickSceneMood(sceneId, topConnection),
     stateLabel: sceneCopy.stateLabel,
     title: buildSceneTitle(sceneId, topConnection),
-    line: pickSceneLine(sceneId, snapshot, runtime, topConnection),
-    overlayLead: buildOverlayLead(sceneId, topConnection),
+    line: pickSceneLine(sceneId, topConnection),
+    overlayLead: buildOverlayLead(
+      sceneId,
+      topConnection,
+      snapshot.activeConnections.length,
+    ),
     guidance: buildGuidance(sceneId, snapshot, runtime),
     reasonTitle: sceneCopy.reasonTitle,
-    reasonDetail: buildReasonDetail(sceneId, runtime, topConnection, normalizedState),
+    reasonDetail: buildReasonDetail(sceneId, snapshot, runtime, topConnection),
     focusProcessName: topConnection?.processName ?? null,
     focusTarget: topConnection?.target ?? null,
     focusRateLabel: topConnection?.totalRate ?? null,
@@ -134,75 +138,74 @@ function buildSceneTitle(
   topConnection: RealtimeConnectionItem | null,
 ): string {
   if (!topConnection) {
-    return GAL_WIDGET_SCENE_COPY[sceneId].reasonTitle;
+    return sceneId === "idle" ? "海面平静" : "正在值守";
   }
 
   switch (sceneId) {
     case "idle":
-      return "当前暂无热点连接";
+      return "海面平静";
     case "watching":
-      return `${topConnection.processName} 正在保持连接`;
+      return `${topConnection.processName} 引起注意`;
     case "busy_download":
-      return `${topConnection.processName} 正在快速下载`;
+      return `${topConnection.processName} 正在吃流量`;
     case "busy_upload":
-      return `${topConnection.processName} 正在持续上传`;
+      return `${topConnection.processName} 正在往外发`;
     case "alert":
-      return `${topConnection.processName} 触发提醒`;
+      return "这条连接值得看一眼";
   }
 }
 
 function buildReasonDetail(
   sceneId: WidgetSceneId,
+  snapshot: RealtimeSnapshotView,
   runtime: DashboardRuntimeView,
   topConnection: RealtimeConnectionItem | null,
-  normalizedState: NormalizedWidgetState,
 ): string {
   if (runtime.errorMessage) {
-    return `agentd 未连接：${runtime.errorMessage}`;
+    return runtime.errorMessage;
+  }
+
+  if (!topConnection) {
+    return "当前没有明显活跃连接，挂件会继续在后台值守。";
   }
 
   switch (sceneId) {
     case "idle":
-      return "当前没有活跃连接，继续值守。";
+      return "现在没有明显热点连接。";
     case "watching":
-      return topConnection
-        ? `${topConnection.processName} 仍在保持连接（${topConnection.totalRate}），先继续观察。`
-        : "有连接动静，但还不构成主导流量。";
+      return `${topConnection.processName} 仍在连接 ${topConnection.target}。`;
     case "busy_download":
-      return topConnection
-        ? `${topConnection.processName} 的下行速率更高（${topConnection.downloadRate}），建议先确认下载来源。`
-        : "下行流量占优，建议先看连接来源。";
+      return `${topConnection.processName} 正在从 ${topConnection.target} 持续下载。`;
     case "busy_upload":
-      return topConnection
-        ? `${topConnection.processName} 正在持续上传（${topConnection.uploadRate}），建议先确认发送目标。`
-        : "上行流量占优，建议先看发送目标。";
+      return `${topConnection.processName} 正在向 ${topConnection.target} 持续上传数据。`;
     case "alert":
-      if (normalizedState === "alerting" && topConnection) {
-        return `${topConnection.processName} 已进入提醒状态，建议立即查看。`;
+      if (snapshot.captureMode === "proc_fallback") {
+        return `${topConnection.processName} 当前最显眼，建议先确认这条连接。`;
       }
-      return "检测到提醒状态，建议立即查看当前榜首连接。";
+      return `${topConnection.processName} 当前行为比平时更值得注意。`;
   }
 }
 
 function buildOverlayLead(
   sceneId: WidgetSceneId,
   topConnection: RealtimeConnectionItem | null,
+  connectionCount: number,
 ): string {
-  if (!topConnection) {
-    return sceneId === "idle" ? "暂无热点连接" : "等待连接细节";
+  if (!topConnection || connectionCount === 0) {
+    return "这会儿还没人抢镜。";
   }
 
   switch (sceneId) {
     case "idle":
-      return "暂无热点连接";
+      return "现在没有明显热点。";
     case "watching":
-      return `观察中：${topConnection.processName} → ${topConnection.target}`;
+      return `${connectionCount} 条连接里，${topConnection.processName} 最值得先看。`;
     case "busy_download":
-      return `下载热点：${topConnection.processName} → ${topConnection.target}`;
+      return `${topConnection.processName} 当前以下行流量为主。`;
     case "busy_upload":
-      return `上传热点：${topConnection.processName} → ${topConnection.target}`;
+      return `${topConnection.processName} 当前以上行流量为主。`;
     case "alert":
-      return `提醒连接：${topConnection.processName} → ${topConnection.target}`;
+      return "这一波建议优先点进去确认。";
   }
 }
 
@@ -235,22 +238,10 @@ function buildGuidance(
 
 function pickSceneLine(
   sceneId: WidgetSceneId,
-  snapshot: RealtimeSnapshotView,
-  runtime: DashboardRuntimeView,
   topConnection: RealtimeConnectionItem | null,
 ): string {
   const lines = GAL_WIDGET_SCENE_COPY[sceneId].lines;
-  const index = stableIndex(
-    [
-      sceneId,
-      snapshot.cycleLabel,
-      runtime.lastUpdatedLabel,
-      topConnection?.sessionId ?? "no-session",
-      topConnection?.processName ?? "no-process",
-      topConnection?.target ?? "no-target",
-    ].join("|"),
-    lines.length,
-  );
+  const index = stableIndex(topConnection?.sessionId ?? sceneId, lines.length);
   return lines[index];
 }
 
