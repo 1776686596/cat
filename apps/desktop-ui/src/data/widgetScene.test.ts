@@ -147,6 +147,30 @@ describe("resolveWidgetScene", () => {
     expect(GAL_WIDGET_ALERT_RUNTIME_COPY.lines).toContain(scene.line);
   });
 
+  it("alerting 且有焦点连接时继续走连接型 alert 文案", () => {
+    const scene = resolveWidgetScene(
+      createSnapshot({
+        widgetState: "alerting",
+        activeConnections: [
+          createConnection({
+            sessionId: "alert-session-1",
+            processName: "firefox",
+            totalRateValue: 320 * 1024,
+          }),
+        ],
+      }),
+      createRuntime(),
+    );
+
+    expect(scene.sceneId).toBe("alert");
+    expect(scene.title).toBe("这条连接值得看一眼");
+    expect(scene.title).not.toBe(GAL_WIDGET_ALERT_RUNTIME_COPY.title);
+    expect(scene.reasonTitle).toBe(GAL_WIDGET_SCENE_COPY.alert.reasonTitle);
+    expect(scene.reasonTitle).not.toBe(GAL_WIDGET_ALERT_RUNTIME_COPY.reasonTitle);
+    expect(GAL_WIDGET_SCENE_COPY.alert.lines).toContain(scene.line);
+    expect(GAL_WIDGET_ALERT_RUNTIME_COPY.lines).not.toContain(scene.line);
+  });
+
   it("同一 sessionId 下台词保持稳定，不受周期或更新时间影响", () => {
     const connection = createConnection({
       sessionId: "stable-session-id",
