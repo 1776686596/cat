@@ -68,6 +68,18 @@ export const GAL_PAGE_COPY = {
   realtime: {
     title: "实时流向",
     lead: "把现在最值得盯住的联网动静、挂件状态和部署准备度放到同一屏里。",
+    hero: {
+      title: "实时流向",
+      runtimeAside: {
+        fallback: "先用回退链路看着",
+        live: "真实链路已经接上了",
+        mock: "先拿演示数据练练眼力吧",
+        connecting: "链路还在接入中，再等等我。",
+      },
+      topEyebrow: "当前榜首",
+      nextEyebrow: "下一步",
+      nextFallback: "先从当前榜首连接开始盯。",
+    },
     widgetPreviewEyebrow: "挂件剧透",
     widgetPreviewTitle: "挂件预览",
     widgetPreviewSummary: "平时安静值守，一靠近就把榜首和提醒交出来。",
