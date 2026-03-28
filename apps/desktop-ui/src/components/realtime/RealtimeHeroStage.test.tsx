@@ -157,6 +157,26 @@ describe("RealtimeHeroStage", () => {
     expect(html).toContain(GAL_PAGE_COPY.realtime.hero.topEmptyDetail);
   });
 
+  it("当 scene focus 为 null 且无连接时，仍然渲染空态", () => {
+    const html = renderToStaticMarkup(
+      <RealtimeHeroStage
+        snapshot={createSnapshot({ activeConnections: [] })}
+        runtime={createRuntime()}
+        widgetScene={createWidgetScene({
+          line: "",
+          focusProcessName: null,
+          focusTarget: null,
+          focusRateLabel: null,
+        })}
+        onRefresh={vi.fn(async () => undefined)}
+      />,
+    );
+
+    expect(html).toContain(GAL_PAGE_COPY.realtime.hero.lineEmpty);
+    expect(html).toContain(GAL_PAGE_COPY.realtime.hero.topEmptyTitle);
+    expect(html).toContain(GAL_PAGE_COPY.realtime.hero.topEmptyDetail);
+  });
+
   it("刷新中时按钮进入 busy 状态并禁用", () => {
     const html = renderToStaticMarkup(
       <RealtimeHeroStage

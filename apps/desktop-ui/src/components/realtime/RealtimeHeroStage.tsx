@@ -60,7 +60,7 @@ export default function RealtimeHeroStage({
       <div className="realtime-hero__aside">
         <article className="realtime-kpi-card">
           <span>{heroCopy.topEyebrow}</span>
-          <strong>{heroFocus?.processName ?? heroCopy.topEmptyTitle}</strong>
+          <strong>{heroFocus?.processName || heroCopy.topEmptyTitle}</strong>
           <p>{topDetail ?? heroCopy.topEmptyDetail}</p>
         </article>
 
@@ -151,9 +151,9 @@ function buildHeroFocus(
   widgetScene: WidgetSceneView,
   topConnection: RealtimeConnectionItem | null,
 ): HeroFocus | null {
-  const sceneProcessName = widgetScene.focusProcessName.trim();
-  const sceneTarget = widgetScene.focusTarget.trim();
-  const sceneRate = widgetScene.focusRateLabel.trim();
+  const sceneProcessName = normalizeSceneField(widgetScene.focusProcessName);
+  const sceneTarget = normalizeSceneField(widgetScene.focusTarget);
+  const sceneRate = normalizeSceneField(widgetScene.focusRateLabel);
 
   if (
     sceneProcessName.length > 0 ||
@@ -179,6 +179,10 @@ function buildHeroFocus(
     target: topConnection.target,
     totalRate: topConnection.totalRate,
   };
+}
+
+function normalizeSceneField(value: string | null) {
+  return value?.trim() ?? "";
 }
 
 function buildTopDetail(heroFocus: HeroFocus | null) {
