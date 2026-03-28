@@ -2,8 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import App from "./App";
-import { getFallbackDashboardData } from "../data/dashboard";
-import type { DashboardRuntimeView } from "../types/appData";
+import type { DashboardData, DashboardRuntimeView } from "../types/appData";
 
 const { mockUseDashboardData } = vi.hoisted(() => ({
   mockUseDashboardData: vi.fn(),
@@ -48,9 +47,41 @@ function createRuntime(
   };
 }
 
+function createDashboardData(): DashboardData {
+  return {
+    realtime: {
+      cycleLabel: "测试周期",
+      uploadRate: "0 KB/s",
+      downloadRate: "0 KB/s",
+      widgetState: "idle",
+      headline: "测试标题",
+      captureMode: "live",
+      activeConnections: [],
+    },
+    diagnostics: {
+      cycleLabel: "测试周期",
+      agentStatus: "ready",
+      captureMode: "live",
+      databaseStatus: "healthy",
+      degradedReason: null,
+      permissionSummary: "已授权",
+      socketPath: "/tmp/agentd.sock",
+      databasePath: "/tmp/traffic.db",
+      platform: "linux",
+      platformLabel: "Linux",
+      supportLabel: "Linux 首发平台",
+      platformSummary: "测试平台摘要",
+      capabilityLabel: "完整观测",
+      capabilitySummary: "测试能力摘要",
+      recommendedAction: "无需动作",
+      setupChecklist: [],
+    },
+  };
+}
+
 function mockDashboardData(runtimeOverrides: Partial<DashboardRuntimeView>) {
   mockUseDashboardData.mockReturnValue({
-    dashboardData: getFallbackDashboardData(),
+    dashboardData: createDashboardData(),
     runtime: createRuntime(runtimeOverrides),
     refresh: vi.fn(async () => undefined),
   });
@@ -67,8 +98,12 @@ describe("App shell copy contract", () => {
     const html = renderToStaticMarkup(<App initialView="realtime" />);
 
     expect(html).toContain("她替你盯着桌面上的每一次外连。");
-    expect(html).toContain("刚刚的动静，我都替你盯着");
-    expect(html).toContain("这些目标最近都不太安分");
+    expect(html).toContain("刚刚的动静，我都替你盯着。");
+    expect(html).toContain("这些目标最近都不太安分。");
+    expect(html).toContain("已接入真实观测链路");
+    expect(html).toContain("当前界面正在读取桌面守护进程的真实快照。");
+    expect(html).not.toContain("先用回退链路看着");
+    expect(html).not.toContain("细节还没看完整，但大方向不会跟丢。");
     expect(html).not.toContain("把桌面上悄悄联网的动静");
   });
 
@@ -77,6 +112,8 @@ describe("App shell copy contract", () => {
 
     const html = renderToStaticMarkup(<App initialView="processes" />);
 
+    expect(html).toContain("ProcessesPage");
+    expect(html).not.toContain("RealtimePage");
     expect(html).toContain("先用回退链路看着");
     expect(html).toContain("细节还没看完整，但大方向不会跟丢。");
   });
