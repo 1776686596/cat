@@ -2,5 +2,6 @@
 /.dev
 /apps/desktop-ui/node_modules
 /apps/desktop-ui/dist
+worktrees/
 *.db
 *.log
