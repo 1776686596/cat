@@ -4,12 +4,12 @@ export const GAL_NAV_ITEMS = [
   {
     key: "realtime",
     label: "实时流向",
-    copy: "把刚发生的联网动静先收拢住。",
+    copy: "刚刚的动静，我都替你盯着。",
   },
   {
     key: "processes",
     label: "进程聚合",
-    copy: "从进程视角看谁最活跃、谁最异常。",
+    copy: "这些目标最近都不太安分。",
   },
   {
     key: "process-detail",
@@ -30,7 +30,7 @@ export const GAL_NAV_ITEMS = [
 
 export const GAL_SHELL_COPY = {
   title: "Traffic Cat 守望席",
-  subtitle: "把桌面上悄悄联网的动静，变成一眼就能看见的值守感。",
+  subtitle: "她替你盯着桌面上的每一次外连。",
   cards: {
     focus: "当前区域",
     platform: "当前平台",
@@ -55,8 +55,8 @@ export const GAL_SHELL_COPY = {
       message: "当前界面正在读取桌面守护进程的真实快照。",
     },
     fallback: {
-      title: "当前处于回退观测",
-      message: "基础动静仍然可见，但精度和覆盖面会低于完整采集。",
+      title: "先用回退链路看着",
+      message: "细节还没看完整，但大方向不会跟丢。",
     },
   },
 } as const;
