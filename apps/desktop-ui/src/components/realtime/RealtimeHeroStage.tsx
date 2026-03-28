@@ -27,9 +27,11 @@ export default function RealtimeHeroStage({
 }: RealtimeHeroStageProps) {
   const heroCopy = GAL_PAGE_COPY.realtime.hero;
   const topConnection = pickTopConnection(snapshot.activeConnections);
+  const heroFocus = buildHeroFocus(widgetScene, topConnection);
   const runtimeAside = getRuntimeAside(runtime);
-  const line = buildHeroLine(widgetScene, topConnection);
-  const nextStep = buildNextStep(widgetScene, topConnection);
+  const line = buildHeroLine(widgetScene, heroFocus);
+  const nextStep = buildNextStep(heroFocus);
+  const topDetail = buildTopDetail(heroFocus);
 
   return (
     <div className="realtime-hero">
@@ -58,12 +60,8 @@ export default function RealtimeHeroStage({
       <div className="realtime-hero__aside">
         <article className="realtime-kpi-card">
           <span>{heroCopy.topEyebrow}</span>
-          <strong>{topConnection?.processName ?? "暂无热点"}</strong>
-          <p>
-            {topConnection
-              ? `${topConnection.target} · ${topConnection.totalRate}`
-              : "现在还没有活跃连接。"}
-          </p>
+          <strong>{heroFocus?.processName ?? heroCopy.topEmptyTitle}</strong>
+          <p>{topDetail ?? heroCopy.topEmptyDetail}</p>
         </article>
 
         <article className="realtime-kpi-card">
@@ -96,6 +94,10 @@ export default function RealtimeHeroStage({
 function getRuntimeAside(runtime: DashboardRuntimeView) {
   const runtimeAsideCopy = GAL_PAGE_COPY.realtime.hero.runtimeAside;
 
+  if (runtime.mode === "disabled") {
+    return runtimeAsideCopy.disabled;
+  }
+
   if (runtime.mode === "mock") {
     return runtimeAsideCopy.mock;
   }
@@ -113,32 +115,86 @@ function getRuntimeAside(runtime: DashboardRuntimeView) {
 
 function buildHeroLine(
   widgetScene: WidgetSceneView,
-  topConnection: RealtimeConnectionItem | null,
+  heroFocus: HeroFocus | null,
 ) {
+  const heroCopy = GAL_PAGE_COPY.realtime.hero;
+
   if (widgetScene.line.trim().length > 0) {
     return widgetScene.line;
   }
 
-  if (topConnection) {
-    return `咦，${topConnection.processName} 又偷偷连出去了呢。`;
+  if (heroFocus?.processName) {
+    return heroCopy.lineWithProcessTemplate.replace(
+      "{processName}",
+      heroFocus.processName,
+    );
   }
 
-  return "现在先静静值守着，有动静我会先叫你。";
+  return heroCopy.lineEmpty;
 }
 
-function buildNextStep(
-  widgetScene: WidgetSceneView,
-  topConnection: RealtimeConnectionItem | null,
-) {
-  if (topConnection) {
-    return `先盯住 ${topConnection.processName}`;
-  }
-
-  if (widgetScene.focusProcessName) {
-    return `先盯住 ${widgetScene.focusProcessName}`;
+function buildNextStep(heroFocus: HeroFocus | null) {
+  if (heroFocus?.processName) {
+    return `先盯住 ${heroFocus.processName}`;
   }
 
   return GAL_PAGE_COPY.realtime.hero.nextFallback;
+}
+
+type HeroFocus = {
+  processName: string;
+  target: string;
+  totalRate: string;
+};
+
+function buildHeroFocus(
+  widgetScene: WidgetSceneView,
+  topConnection: RealtimeConnectionItem | null,
+): HeroFocus | null {
+  const sceneProcessName = widgetScene.focusProcessName.trim();
+  const sceneTarget = widgetScene.focusTarget.trim();
+  const sceneRate = widgetScene.focusRateLabel.trim();
+
+  if (
+    sceneProcessName.length > 0 ||
+    sceneTarget.length > 0 ||
+    sceneRate.length > 0
+  ) {
+    return {
+      processName:
+        sceneProcessName.length > 0
+          ? sceneProcessName
+          : topConnection?.processName ?? "",
+      target: sceneTarget.length > 0 ? sceneTarget : topConnection?.target ?? "",
+      totalRate: sceneRate.length > 0 ? sceneRate : topConnection?.totalRate ?? "",
+    };
+  }
+
+  if (!topConnection) {
+    return null;
+  }
+
+  return {
+    processName: topConnection.processName,
+    target: topConnection.target,
+    totalRate: topConnection.totalRate,
+  };
+}
+
+function buildTopDetail(heroFocus: HeroFocus | null) {
+  if (!heroFocus) {
+    return null;
+  }
+
+  const detailParts = [heroFocus.target, heroFocus.totalRate].filter(
+    (part) => part.length > 0,
+  );
+
+  if (detailParts.length === 0) {
+    return null;
+  }
+
+  return detailParts.join(" · ");
 }
 
 function pickTopConnection(
