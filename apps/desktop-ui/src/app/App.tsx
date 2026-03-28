@@ -32,6 +32,20 @@ export default function App({
   const { dashboardData, runtime, refresh } = useDashboardData();
   const processDetailLocked = selectedProcessId === null;
   const runtimeTone = getRuntimeTone(runtime.mode);
+  const sidebarFacts = [
+    {
+      label: GAL_SHELL_COPY.cards.focus,
+      value: PAGE_TITLES[activeView],
+    },
+    {
+      label: GAL_SHELL_COPY.cards.capability,
+      value: `${dashboardData.diagnostics.platformLabel} · ${dashboardData.diagnostics.capabilityLabel}`,
+    },
+    {
+      label: GAL_SHELL_COPY.cards.sync,
+      value: runtime.lastUpdatedLabel,
+    },
+  ];
   const inspectProcess = (pid: number) => {
     setSelectedProcessId(pid);
     setActiveView("process-detail");
@@ -101,22 +115,12 @@ export default function App({
         </div>
 
         <div className="sidebar-overview">
-          <div className="sidebar-overview-card">
-            <span>{GAL_SHELL_COPY.cards.focus}</span>
-            <strong>{PAGE_TITLES[activeView]}</strong>
-          </div>
-          <div className="sidebar-overview-card">
-            <span>{GAL_SHELL_COPY.cards.platform}</span>
-            <strong>{dashboardData.diagnostics.platformLabel}</strong>
-          </div>
-          <div className="sidebar-overview-card">
-            <span>{GAL_SHELL_COPY.cards.capability}</span>
-            <strong>{dashboardData.diagnostics.capabilityLabel}</strong>
-          </div>
-          <div className="sidebar-overview-card">
-            <span>{GAL_SHELL_COPY.cards.sync}</span>
-            <strong>{runtime.lastUpdatedLabel}</strong>
-          </div>
+          {sidebarFacts.map((item) => (
+            <div className="sidebar-overview-card" key={item.label}>
+              <span>{item.label}</span>
+              <strong>{item.value}</strong>
+            </div>
+          ))}
         </div>
 
         <nav className="nav-list" aria-label="主导航">
@@ -176,7 +180,7 @@ export default function App({
       </aside>
 
       <div className="app-content">
-        {renderRuntimeBanner(runtime)}
+        {activeView === "realtime" ? null : renderRuntimeBanner(runtime)}
         {activePage}
       </div>
     </div>

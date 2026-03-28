@@ -100,8 +100,8 @@ describe("App shell copy contract", () => {
     expect(html).toContain("她替你盯着桌面上的每一次外连。");
     expect(html).toContain("刚刚的动静，我都替你盯着。");
     expect(html).toContain("这些目标最近都不太安分。");
-    expect(html).toContain("已接入真实观测链路");
-    expect(html).toContain("当前界面正在读取桌面守护进程的真实快照。");
+    expect(html).toContain("Linux · 完整观测");
+    expect(html).not.toContain('class="global-banner');
     expect(html).not.toContain("先用回退链路看着");
     expect(html).not.toContain("细节还没看完整，但大方向不会跟丢。");
     expect(html).not.toContain("把桌面上悄悄联网的动静");
@@ -116,5 +116,17 @@ describe("App shell copy contract", () => {
     expect(html).not.toContain("RealtimePage");
     expect(html).toContain("先用回退链路看着");
     expect(html).toContain("细节还没看完整，但大方向不会跟丢。");
+  });
+
+  it("realtime 页不再叠加全局 runtime banner，侧边概览也缩成三条", () => {
+    mockDashboardData({ mode: "fallback", isFallback: true });
+
+    const html = renderToStaticMarkup(<App initialView="realtime" />);
+
+    expect(html).not.toContain('class="global-banner');
+    expect(html).toContain("当前区域");
+    expect(html).toContain("观测能力");
+    expect(html).toContain("最近同步");
+    expect(html).not.toContain("当前平台");
   });
 });
