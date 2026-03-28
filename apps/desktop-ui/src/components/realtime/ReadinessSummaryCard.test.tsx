@@ -31,13 +31,18 @@ const diagnostics: DiagnosticsSnapshotView = {
 };
 
 describe("ReadinessSummaryCard", () => {
-  it("把准备度收成摘要和 details 入口", () => {
+  it("把准备度收成更短的状态句和 details 入口", () => {
     const html = renderToStaticMarkup(
       <ReadinessSummaryCard diagnostics={diagnostics} />,
     );
 
     expect(html).toContain("这台机器现在能看到多少");
-    expect(html).toContain("先把 agentd 接上，再确认速率可信度。");
+    expect(html).toContain("还差一点，我帮你盯着。");
+    expect(html).toContain("Linux 优先支持。");
+    expect(html).toContain("先看大方向，细节再补。");
     expect(html).toContain("展开启动检查");
+    expect(html).not.toContain("先把 agentd 接上，再确认速率可信度。");
+    expect(html).not.toContain("Linux 端可以继续值守。");
+    expect(html).not.toContain("现在先用 /proc 把大方向盯住。");
   });
 });
